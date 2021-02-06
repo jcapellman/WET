@@ -1,0 +1,6 @@
+.vs/
+bin/
+obj/
+*.lock.json
+/Properties/PublishProfiles
+packages/
