@@ -4,10 +4,11 @@ using System.Threading.Tasks;
 
 using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Diagnostics.Tracing.Session;
+using WET.lib.Enums;
 
 namespace WET.lib
 {
-    public class ImageLoadMonitor
+    public class ETWMonitor
     {
         public class ImageLoadMonitorItem
         {
@@ -18,7 +19,7 @@ namespace WET.lib
             public int ThreadID { get; internal set; }
         }
 
-        public const string DefaultSessionName = nameof(ImageLoadMonitor);
+        public const string DefaultSessionName = nameof(ETWMonitor);
 
         private readonly CancellationTokenSource _ctSource = new CancellationTokenSource();
 
@@ -26,18 +27,34 @@ namespace WET.lib
 
         public event EventHandler<ImageLoadMonitorItem> OnImageLoad; 
 
-        public void Start(string sessionName = DefaultSessionName)
+        public void Start(string sessionName = DefaultSessionName, params MonitorTypes[] monitorTypes)
         {
             Task.Run(() =>
             {
                 _session = new TraceEventSession(sessionName);
 
-                _session.EnableKernelProvider(KernelTraceEventParser.Keywords.ImageLoad);
-
-                _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
+                foreach (var monitorType in monitorTypes)
+                {
+                    switch (monitorType)
+                    {
+                        case MonitorTypes.IMAGE_LOAD:
+                            _session.EnableKernelProvider(KernelTraceEventParser.Keywords.ImageLoad);
+                            _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
+                            break;
+                        case MonitorTypes.PROCESS_START:
+                            _session.EnableKernelProvider(KernelTraceEventParser.Keywords.Process);
+                            _session.Source.Kernel.ProcessStart += Kernel_ProcessStart;
+                            break;
+                    }
+                }
 
                 _session.Source.Process();
             }, _ctSource.Token);
+        }
+
+        private void Kernel_ProcessStart(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj)
+        {
+            throw new NotImplementedException();
         }
 
         public void Stop()

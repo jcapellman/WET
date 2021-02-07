@@ -2,27 +2,28 @@
 using System.Windows;
 
 using WET.lib;
+using WET.lib.Enums;
 
 namespace WET.WPF
 {
     public partial class MainWindow : Window
     {
-        private readonly lib.ImageLoadMonitor _monitor;
+        private readonly lib.ETWMonitor _monitor;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _monitor = new ImageLoadMonitor();
+            _monitor = new ETWMonitor();
 
             _monitor.OnImageLoad += Monitor_OnImageLoad;
 
             Closing += MainWindow_Closing;
 
-            _monitor.Start();
+            _monitor.Start(monitorTypes: MonitorTypes.IMAGE_LOAD | MonitorTypes.PROCESS_START);
         }
 
-        private void Monitor_OnImageLoad(object sender, ImageLoadMonitor.ImageLoadMonitorItem e)
+        private void Monitor_OnImageLoad(object sender, ETWMonitor.ImageLoadMonitorItem e)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
