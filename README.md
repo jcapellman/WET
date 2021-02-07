@@ -8,14 +8,15 @@ The purpose of this library is to hook into various Event Tracing events on Wind
 ## Usage
 ### DLL Load Hook
 To get an event hook on every DLL Load simply add a NuGet reference and the code below:
+```
+var monitor = new ImageLoadMonitor();
 
-   var monitor = new ImageLoadMonitor();
-
-   monitor.OnImageLoad += Monitor_OnImageLoad;
+monitor.OnImageLoad += Monitor_OnImageLoad;
   
-   private void Monitor_OnImageLoad(object sender, ImageLoadMonitor.ImageLoadMonitorItem e)
-   {
-       Console.WriteLine($"{e.ProcessID}|{e.ThreadID}|{e.FileName}{Environment.NewLine}");
-   }
-   
+private void Monitor_OnImageLoad(object sender, ImageLoadMonitor.ImageLoadMonitorItem e)
+{
+    Console.WriteLine($"{e.ProcessID}|{e.ThreadID}|{e.FileName}{Environment.NewLine}");
+}
+```
+
 Make sure to call `monitor.stop()` upon exiting your application.
