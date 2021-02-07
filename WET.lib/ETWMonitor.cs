@@ -14,11 +14,13 @@ namespace WET.lib
     {
         public const string DefaultSessionName = nameof(ETWMonitor);
 
-        private readonly CancellationTokenSource _ctSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _ctSource = new();
 
         private TraceEventSession _session;
 
-        public event EventHandler<ImageLoadMonitorItem> OnImageLoad; 
+        public event EventHandler<ImageLoadMonitorItem> OnImageLoad;
+
+        public event EventHandler<ProcessStartMonitorItem> OnProcessStart;
 
         public void Start(string sessionName = DefaultSessionName, params MonitorTypes[] monitorTypes)
         {
@@ -47,7 +49,14 @@ namespace WET.lib
 
         private void Kernel_ProcessStart(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj)
         {
-            throw new NotImplementedException();
+            var item = new ProcessStartMonitorItem
+            {
+                FileName = obj.ImageFileName,
+                ParentProcessID = obj.ParentID,
+                CommandLineArguments = obj.CommandLine
+            };
+
+            OnProcessStart?.Invoke(this, item);
         }
 
         public void Stop()
