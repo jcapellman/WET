@@ -2,10 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Diagnostics.Tracing.Session;
 
 using WET.lib.Enums;
+using WET.lib.Extensions;
 using WET.lib.MonitorItems;
 
 namespace WET.lib
@@ -27,8 +27,8 @@ namespace WET.lib
             Task.Run(() =>
             {
                 _session = new TraceEventSession(sessionName);
-
-                var kernelFlags = KernelTraceEventParser.Keywords.None;
+                
+                _session.EnableKernelProvider(monitorTypes.ToKeywords());
 
                 foreach (MonitorTypes monitorType in Enum.GetValues(typeof(MonitorTypes)))
                 {
@@ -41,21 +41,15 @@ namespace WET.lib
                     {
                         case MonitorTypes.ImageLoad:
                             _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
-
-                            kernelFlags |= KernelTraceEventParser.Keywords.ImageLoad;
-                       
+                            
                             break;
                         case MonitorTypes.ProcessStart:
                             _session.Source.Kernel.ProcessStart += Kernel_ProcessStart;
-                            
-                            kernelFlags |= KernelTraceEventParser.Keywords.Process;
                             
                             break;
                     }
                 }
                 
-                _session.EnableKernelProvider(kernelFlags);
-
                 _session.Source.Process();
             }, _ctSource.Token);
         }
