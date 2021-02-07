@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,6 +9,7 @@ using Microsoft.Diagnostics.Tracing.Session;
 using WET.lib.Enums;
 using WET.lib.Extensions;
 using WET.lib.MonitorItems;
+using WET.lib.Monitors.Base;
 
 namespace WET.lib
 {
@@ -22,22 +25,27 @@ namespace WET.lib
 
         public event EventHandler<ProcessStartMonitorItem> OnProcessStart;
 
+        private readonly List<BaseMonitor> _monitors;
+
+        public ETWMonitor()
+        {
+            _monitors = this.GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
+                .Select(a => (BaseMonitor) Activator.CreateInstance(a)).ToList();
+        }
+
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
             Task.Run(() =>
             {
                 _session = new TraceEventSession(sessionName);
-                
-                _session.EnableKernelProvider(monitorTypes.ToKeywords());
 
-                foreach (MonitorTypes monitorType in Enum.GetValues(typeof(MonitorTypes)))
+                var enabledMonitors = _monitors.Where(a => monitorTypes.HasFlag(a.MonitorType)).ToList();
+
+                _session.EnableKernelProvider(enabledMonitors.Select(a => a.KeyWordMap).ToKeywords());
+
+                foreach (var monitor in enabledMonitors)
                 {
-                    if (!monitorTypes.HasFlag(monitorType))
-                    {
-                        continue;
-                    }
-
-                    switch (monitorType)
+                    switch (monitor.MonitorType)
                     {
                         case MonitorTypes.ImageLoad:
                             _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
