@@ -22,26 +22,39 @@ namespace WET.lib
 
         public event EventHandler<ProcessStartMonitorItem> OnProcessStart;
 
-        public void Start(string sessionName = DefaultSessionName, params MonitorTypes[] monitorTypes)
+        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
             Task.Run(() =>
             {
                 _session = new TraceEventSession(sessionName);
 
-                foreach (var monitorType in monitorTypes)
+                var kernelFlags = KernelTraceEventParser.Keywords.None;
+
+                foreach (MonitorTypes monitorType in Enum.GetValues(typeof(MonitorTypes)))
                 {
+                    if (!monitorTypes.HasFlag(monitorType))
+                    {
+                        continue;
+                    }
+
                     switch (monitorType)
                     {
-                        case MonitorTypes.IMAGE_LOAD:
-                            _session.EnableKernelProvider(KernelTraceEventParser.Keywords.ImageLoad);
+                        case MonitorTypes.ImageLoad:
                             _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
+
+                            kernelFlags |= KernelTraceEventParser.Keywords.ImageLoad;
+                       
                             break;
-                        case MonitorTypes.PROCESS_START:
-                            _session.EnableKernelProvider(KernelTraceEventParser.Keywords.Process);
+                        case MonitorTypes.ProcessStart:
                             _session.Source.Kernel.ProcessStart += Kernel_ProcessStart;
+                            
+                            kernelFlags |= KernelTraceEventParser.Keywords.Process;
+                            
                             break;
                     }
                 }
+                
+                _session.EnableKernelProvider(kernelFlags);
 
                 _session.Source.Process();
             }, _ctSource.Token);

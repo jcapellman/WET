@@ -2,7 +2,6 @@
 using System.Windows;
 
 using WET.lib;
-using WET.lib.Enums;
 
 namespace WET.WPF
 {
@@ -20,7 +19,7 @@ namespace WET.WPF
             _monitor.OnProcessStart += _monitor_OnProcessStart;
             Closing += MainWindow_Closing;
 
-            _monitor.Start(monitorTypes: MonitorTypes.IMAGE_LOAD | MonitorTypes.PROCESS_START);
+            _monitor.Start("WETWPFTest");
         }
 
         private void _monitor_OnProcessStart(object sender, lib.MonitorItems.ProcessStartMonitorItem e)
