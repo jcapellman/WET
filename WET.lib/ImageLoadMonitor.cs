@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Diagnostics.Tracing.Session;
 
-namespace DLLMonitor.lib
+namespace WET.lib
 {
     public class ImageLoadMonitor
     {
@@ -18,15 +18,15 @@ namespace DLLMonitor.lib
             public int ThreadID { get; internal set; }
         }
 
-        public const string DEFAULT_SESSION_NAME = nameof(DLLMonitor);
+        public const string DefaultSessionName = nameof(ImageLoadMonitor);
 
-        private readonly CancellationTokenSource ctSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _ctSource = new CancellationTokenSource();
 
         private TraceEventSession _session;
 
         public event EventHandler<ImageLoadMonitorItem> OnImageLoad; 
 
-        public void Start(string sessionName = DEFAULT_SESSION_NAME)
+        public void Start(string sessionName = DefaultSessionName)
         {
             Task.Run(() =>
             {
@@ -37,12 +37,12 @@ namespace DLLMonitor.lib
                 _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
 
                 _session.Source.Process();
-            }, ctSource.Token);
+            }, _ctSource.Token);
         }
 
         public void Stop()
         {
-            ctSource.Cancel();
+            _ctSource.Cancel();
 
             _session.Stop(true);
         }

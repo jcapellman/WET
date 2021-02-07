@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Windows;
 
-using DLLMonitor.lib;
+using WET.lib;
 
-namespace DLLMonitor.WPF
+namespace WET.WPF
 {
     public partial class MainWindow : Window
     {

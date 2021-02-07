@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DLLMonitor.lib\DLLMonitor.lib.csproj" />
+    <ProjectReference Include="..\WET.lib\WET.lib.csproj" />
   </ItemGroup>
 
 </Project>
