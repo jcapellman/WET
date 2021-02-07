@@ -4,21 +4,14 @@ using System.Threading.Tasks;
 
 using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Diagnostics.Tracing.Session;
+
 using WET.lib.Enums;
+using WET.lib.MonitorItems;
 
 namespace WET.lib
 {
     public class ETWMonitor
     {
-        public class ImageLoadMonitorItem
-        {
-            public string FileName { get; internal set; }
-
-            public int ProcessID { get; internal set; }
-
-            public int ThreadID { get; internal set; }
-        }
-
         public const string DefaultSessionName = nameof(ETWMonitor);
 
         private readonly CancellationTokenSource _ctSource = new CancellationTokenSource();

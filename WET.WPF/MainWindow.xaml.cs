@@ -23,7 +23,7 @@ namespace WET.WPF
             _monitor.Start(monitorTypes: MonitorTypes.IMAGE_LOAD | MonitorTypes.PROCESS_START);
         }
 
-        private void Monitor_OnImageLoad(object sender, ETWMonitor.ImageLoadMonitorItem e)
+        private void Monitor_OnImageLoad(object sender, lib.MonitorItems.ImageLoadMonitorItem e)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
