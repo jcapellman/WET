@@ -17,9 +17,10 @@ namespace WET.WPF
 
             _monitor.OnImageLoad += Monitor_OnImageLoad;
             _monitor.OnProcessStart += _monitor_OnProcessStart;
+
             Closing += MainWindow_Closing;
 
-            _monitor.Start("WETWPFTest");
+            _monitor.Start();
         }
 
         private void _monitor_OnProcessStart(object sender, lib.MonitorItems.ProcessStartMonitorItem e)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Session;
 
 using WET.lib.Enums;
@@ -13,7 +14,7 @@ using WET.lib.Monitors.Base;
 
 namespace WET.lib
 {
-    public class ETWMonitor
+    public class ETWMonitor : IDisposable
     {
         public const string DefaultSessionName = nameof(ETWMonitor);
 
@@ -27,9 +28,12 @@ namespace WET.lib
 
         private readonly List<BaseMonitor> _monitors;
 
+        private object ParseData(TraceEvent eventData, MonitorTypes monitorType) =>
+            _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.ParseTraceEvent(eventData);
+
         public ETWMonitor()
         {
-            _monitors = this.GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
+            _monitors = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
                 .Select(a => (BaseMonitor) Activator.CreateInstance(a)).ToList();
         }
 
@@ -62,17 +66,11 @@ namespace WET.lib
             }, _ctSource.Token);
         }
 
-        private void Kernel_ProcessStart(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj)
-        {
-            var item = new ProcessStartMonitorItem
-            {
-                FileName = obj.ImageFileName,
-                ParentProcessID = obj.ParentID,
-                CommandLineArguments = obj.CommandLine
-            };
+        private void Kernel_ProcessStart(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj) => 
+            OnProcessStart?.Invoke(this, (ProcessStartMonitorItem)ParseData(obj, MonitorTypes.ProcessStart));
 
-            OnProcessStart?.Invoke(this, item);
-        }
+        private void Kernel_ImageLoad(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ImageLoadTraceData obj) =>
+            OnImageLoad?.Invoke(this, (ImageLoadMonitorItem)ParseData(obj, MonitorTypes.ImageLoad));
 
         public void Stop()
         {
@@ -80,17 +78,14 @@ namespace WET.lib
 
             _session.Stop(true);
         }
-
-        private void Kernel_ImageLoad(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ImageLoadTraceData obj)
+        
+        public void Dispose()
         {
-            var item = new ImageLoadMonitorItem()
-            {
-                FileName = obj.FileName,
-                ProcessID = obj.ProcessID,
-                ThreadID = obj.ThreadID
-            };
+            _ctSource.Cancel();
 
-            OnImageLoad?.Invoke(this, item);
+            _session.Stop(true);
+
+            GC.SuppressFinalize(this);
         }
     }
 }
