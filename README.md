@@ -6,6 +6,8 @@ The purpose of this library is to hook into various Event Tracing events on Wind
 * Windows 7 SP1+
 
 ## Installation
+Either clone this repository or use the pre-built version that has been uploaded to NuGet.org. Below are two methods of adding the package to your existing project:
+
 ### Package Manager
 ```
 Install-Package WET.lib -Version 0.2.0
