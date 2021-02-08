@@ -17,6 +17,8 @@ dotnet add package WET.lib --version 0.2.0
 ```
 
 ## Usage
+The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.2.0 - both the DLL Load and Process Start hooks are enabled).
+
 ### DLL Load Hook
 To get an event hook on every DLL Load simply add a NuGet reference and the code below:
 ```
@@ -41,4 +43,5 @@ private void _monitor_OnProcessStart(object sender, lib.MonitorItems.ProcessStar
     Console.WriteLine($"Process Start: {e.ParentProcessID}|{e.FileName}|{e.CommandLineArguments}{Environment.NewLine}");
 }
 ```
-Make sure to call `monitor.stop()` upon exiting your application.
+### Notes
+Make sure to call `monitor.stop()` upon exiting your application - code has been put in place to properly shutdown the tracing upon being disposed, however ensuring a call to stop is highly recommended.
