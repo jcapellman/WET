@@ -5,6 +5,17 @@ The purpose of this library is to hook into various Event Tracing events on Wind
 * .NET 5
 * Windows 7 SP1+
 
+## Installation
+### Package Manager
+```
+Install-Package WET.lib -Version 0.2.0
+```
+
+### .NET CLI
+```
+dotnet add package WET.lib --version 0.2.0
+```
+
 ## Usage
 ### DLL Load Hook
 To get an event hook on every DLL Load simply add a NuGet reference and the code below:
