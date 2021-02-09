@@ -8,6 +8,7 @@ namespace WET.lib.Enums
         ImageLoad = 1,
         ImageUnload = 2,
         ProcessStart = 4,
-        ProcessStop = 8
+        ProcessStop = 8,
+        FileRead = 16
     }
 }

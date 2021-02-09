@@ -22,6 +22,8 @@ namespace WET.lib
 
         private TraceEventSession _session;
 
+        public event EventHandler<FileReadMonitorItem> OnFileRead; 
+
         public event EventHandler<ImageLoadMonitorItem> OnImageLoad;
 
         public event EventHandler<ImageUnloadMonitorItem> OnImageUnload;
@@ -53,6 +55,9 @@ namespace WET.lib
             {
                 switch (monitor.MonitorType)
                 {
+                    case MonitorTypes.FileRead:
+                        _session.Source.Kernel.DiskIORead += Kernel_DiskIORead;
+                        break;
                     case MonitorTypes.ImageLoad:
                         _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
                         break;
@@ -70,6 +75,11 @@ namespace WET.lib
 
             _session.Source.Process();
         }
+
+        private void Kernel_DiskIORead(Microsoft.Diagnostics.Tracing.Parsers.Kernel.DiskIOTraceData obj)
+        =>
+            OnFileRead?.Invoke(this, (FileReadMonitorItem)ParseData(obj, MonitorTypes.FileRead));
+            
 
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
