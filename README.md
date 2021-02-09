@@ -10,16 +10,16 @@ Either clone this repository or use the pre-built version that has been uploaded
 
 ### Package Manager
 ```
-Install-Package WET.lib -Version 0.2.0
+Install-Package WET.lib -Version 0.3.0
 ```
 
 ### .NET CLI
 ```
-dotnet add package WET.lib --version 0.2.0
+dotnet add package WET.lib --version 0.3.0
 ```
 
 ## Usage
-The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.2.0 - both the DLL Load and Process Start hooks are enabled).
+The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.3.0 - both the DLL Load and Process Start hooks are enabled).
 
 ### DLL Load Hook
 To get an event hook on every DLL Load simply add a NuGet reference and the code below:
@@ -43,6 +43,42 @@ monitor.OnProcessStart += _monitor_OnProcessStart;
 private void _monitor_OnProcessStart(object sender, lib.MonitorItems.ProcessStartMonitorItem e)
 {
     Console.WriteLine($"Process Start: {e.ParentProcessID}|{e.FileName}|{e.CommandLineArguments}{Environment.NewLine}");
+}
+```
+### Registry Create Hook
+To get an event hook on every Registry Create key event simply add a NuGet reference and the code below:
+```
+var monitor = new ETWMonitor();
+
+monitor.OnRegistryCreate += _monitor_OnRegistryCreate;
+  
+private void _monitor_OnRegistryCreate(object sender, lib.MonitorItems.RegistryCreateMonitorItem e)
+{
+    Console.WriteLine($"Registry Create: {e.ProcessID}|{e.ProcessName}|{e.KeyName}{Environment.NewLine}");
+}
+```
+### Registry Delete Hook
+To get an event hook on every Registry Delete event simply add a NuGet reference and the code below:
+```
+var monitor = new ETWMonitor();
+
+monitor.OnRegistryDelete += _monitor_OnRegistryDelete;
+  
+private void _monitor_OnRegistryDelete(object sender, lib.MonitorItems.RegistryDeleteMonitorItem e)
+{
+    Console.WriteLine($"Registry Delete: {e.ProcessID}|{e.ProcessName}{Environment.NewLine}");
+}
+```
+### Registry Update Hook
+To get an event hook on every Registry Update event simply add a NuGet reference and the code below:
+```
+var monitor = new ETWMonitor();
+
+monitor.OnRegistryUpdate += _monitor_OnRegistryUpdate;
+  
+private void _monitor_OnRegistryDelete(object sender, lib.MonitorItems.RegistryDeleteMonitorItem e)
+{
+    Console.WriteLine($"Registry Update: {e.ProcessID}|{e.ProcessName}|{e.ValueName}{Environment.NewLine}");
 }
 ```
 ### Notes
