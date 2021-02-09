@@ -105,5 +105,17 @@ private void _monitor_OnRegistryDelete(object sender, lib.MonitorItems.RegistryD
     Console.WriteLine($"Registry Update: {e.ProcessID}|{e.ProcessName}|{e.ValueName}{Environment.NewLine}");
 }
 ```
+### TCP Connect Hook
+To get an event hook on every TCP Connect event simply add a NuGet reference and the code below:
+```
+var monitor = new ETWMonitor();
+
+monitor.OnTcpConnect += _monitor_OnTcpConnect;
+  
+private void _monitor_OnTcpConnect(object sender, lib.MonitorItems.TcpConnectMonitorItem e)
+{
+    Console.WriteLine($"Tcp Connect: {e.ProcessID}|{e.ProcessName}|{e.DestinationIP}:{e.DestinationPort}{Environment.NewLine}");
+}
+```
 ### Notes
 Make sure to call `monitor.stop()` upon exiting your application - code has been put in place to properly shutdown the tracing upon being disposed, however ensuring a call to stop is highly recommended.
