@@ -26,8 +26,10 @@ namespace WET.lib
 
         public event EventHandler<ProcessStartMonitorItem> OnProcessStart;
 
-        private readonly List<BaseMonitor> _monitors;
+        public event EventHandler<ProcessStopMonitorItem> OnProcessStop;
 
+        private readonly List<BaseMonitor> _monitors;
+        
         private object ParseData(TraceEvent eventData, MonitorTypes monitorType) =>
             _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.ParseTraceEvent(eventData);
 
@@ -53,11 +55,12 @@ namespace WET.lib
                     {
                         case MonitorTypes.ImageLoad:
                             _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
-                            
                             break;
                         case MonitorTypes.ProcessStart:
                             _session.Source.Kernel.ProcessStart += Kernel_ProcessStart;
-                            
+                            break;
+                        case MonitorTypes.ProcessStop:
+                            _session.Source.Kernel.ProcessStop += Kernel_ProcessStop;
                             break;
                     }
                 }
@@ -65,6 +68,9 @@ namespace WET.lib
                 _session.Source.Process();
             }, _ctSource.Token);
         }
+
+        private void Kernel_ProcessStop(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj) =>
+            OnProcessStop?.Invoke(this, (ProcessStopMonitorItem)ParseData(obj, MonitorTypes.ProcessStop));
 
         private void Kernel_ProcessStart(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj) => 
             OnProcessStart?.Invoke(this, (ProcessStartMonitorItem)ParseData(obj, MonitorTypes.ProcessStart));
