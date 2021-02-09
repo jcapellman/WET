@@ -24,6 +24,8 @@ namespace WET.lib
 
         public event EventHandler<ImageLoadMonitorItem> OnImageLoad;
 
+        public event EventHandler<ImageUnloadMonitorItem> OnImageUnload;
+
         public event EventHandler<ProcessStartMonitorItem> OnProcessStart;
 
         public event EventHandler<ProcessStopMonitorItem> OnProcessStop;
@@ -54,6 +56,9 @@ namespace WET.lib
                     case MonitorTypes.ImageLoad:
                         _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
                         break;
+                    case MonitorTypes.ImageUnload:
+                        _session.Source.Kernel.ImageUnload += Kernel_ImageUnload;
+                        break;
                     case MonitorTypes.ProcessStart:
                         _session.Source.Kernel.ProcessStart += Kernel_ProcessStart;
                         break;
@@ -82,6 +87,9 @@ namespace WET.lib
 
         private void Kernel_ImageLoad(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ImageLoadTraceData obj) =>
             OnImageLoad?.Invoke(this, (ImageLoadMonitorItem)ParseData(obj, MonitorTypes.ImageLoad));
+
+        private void Kernel_ImageUnload(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ImageLoadTraceData obj) =>
+            OnImageUnload?.Invoke(this, (ImageUnloadMonitorItem)ParseData(obj, MonitorTypes.ImageUnload));
 
         public void Stop()
         {
