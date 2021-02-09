@@ -1,6 +1,17 @@
 # WET (Windows Event Tracing) Library
 The purpose of this library is to hook into various Event Tracing events on Windows with just 2 lines of code for the integrator.
 
+The library currents hooks into the following events:
+* DLL Load
+* DLL Unload
+* Process Start
+* Process Stop
+* Registry Key Create
+* Registry Key Delete
+* Registry Key Update
+* TCP Connection
+* TCP Disconnection
+
 ## Requirements
 * .NET 5
 * Windows 7 SP1+
@@ -17,6 +28,12 @@ Install-Package WET.lib -Version 0.3.0
 ```
 dotnet add package WET.lib --version 0.3.0
 ```
+
+## Roadmap
+Hooks for the following are planned:
+* File Create/Delete/Read/Update
+* TCP Receive/Send
+* UDP Connect/Disconnect/Receive/Send
 
 ## Usage
 The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.3.0 - both the DLL Load and Process Start hooks are enabled).
