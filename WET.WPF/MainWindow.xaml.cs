@@ -17,6 +17,7 @@ namespace WET.WPF
             _monitor = new ETWMonitor();
 
             _monitor.OnImageLoad += Monitor_OnImageLoad;
+            _monitor.OnImageUnload += _monitor_OnImageUnload;
             _monitor.OnProcessStart += _monitor_OnProcessStart;
             _monitor.OnProcessStop += _monitor_OnProcessStop;
             _monitor.OnFileRead += _monitor_OnFileRead;
@@ -25,10 +26,27 @@ namespace WET.WPF
             _monitor.OnRegistryDelete += _monitor_OnRegistryDelete;
             _monitor.OnTcpConnect += _monitor_OnTcpConnect;
             _monitor.OnTcpDisconnect += _monitor_OnTcpDisconnect;
+            _monitor.OnTcpReceive += _monitor_OnTcpReceive;
 
             Closing += MainWindow_Closing;
 
-            _monitor.Start(monitorTypes: MonitorTypes.TcpDisconnect | MonitorTypes.ProcessStart | MonitorTypes.RegistryUpdate | MonitorTypes.RegistryDelete | MonitorTypes.TcpConnect);
+            _monitor.Start(monitorTypes: MonitorTypes.TcpDisconnect | MonitorTypes.TcpReceive | MonitorTypes.ProcessStart | MonitorTypes.RegistryUpdate | MonitorTypes.RegistryDelete | MonitorTypes.TcpConnect);
+        }
+
+        private void _monitor_OnTcpReceive(object sender, lib.MonitorItems.TcpReceiveMonitorItem e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                txtBxDLLLoads.Text = txtBxDLLLoads.Text.Insert(0, $"TCP Receive: {e.ProcessID}|{e.DestinationIP}:{e.DestinationPort}|{e.Size}{Environment.NewLine}");
+            });
+        }
+
+        private void _monitor_OnImageUnload(object sender, lib.MonitorItems.ImageUnloadMonitorItem e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                txtBxDLLLoads.Text = txtBxDLLLoads.Text.Insert(0, $"DLL Unload: {e.ProcessID}|{e.ThreadID}|{e.FileName}{Environment.NewLine}");
+            });
         }
 
         private void _monitor_OnTcpDisconnect(object sender, lib.MonitorItems.TcpDisconnectMonitorItem e)

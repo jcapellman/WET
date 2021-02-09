@@ -42,6 +42,8 @@ namespace WET.lib
 
         public event EventHandler<TcpDisconnectMonitorItem> OnTcpDisconnect;
 
+        public event EventHandler<TcpReceiveMonitorItem> OnTcpReceive;
+
         private readonly List<BaseMonitor> _monitors;
         
         private object ParseData(TraceEvent eventData, MonitorTypes monitorType) =>
@@ -95,6 +97,9 @@ namespace WET.lib
                     case MonitorTypes.TcpDisconnect:
                         _session.Source.Kernel.TcpIpDisconnect += Kernel_TcpIpDisconnect;
                         break;
+                    case MonitorTypes.TcpReceive:
+                        _session.Source.Kernel.TcpIpRecv += Kernel_TcpIpRecv;
+                        break;
                 }
             }
 
@@ -114,6 +119,9 @@ namespace WET.lib
 
         private void Kernel_TcpIpDisconnect(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpTraceData obj) =>
             OnTcpDisconnect?.Invoke(this, (TcpDisconnectMonitorItem)ParseData(obj, MonitorTypes.TcpDisconnect));
+
+        private void Kernel_TcpIpRecv(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpTraceData obj) =>
+            OnTcpReceive?.Invoke(this, (TcpReceiveMonitorItem)ParseData(obj, MonitorTypes.TcpReceive));
 
         private void Kernel_RegistryCreate(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
             OnRegistryCreate?.Invoke(this, (RegistryCreateMonitorItem)ParseData(obj, MonitorTypes.RegistryCreate));
