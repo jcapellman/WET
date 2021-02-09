@@ -11,6 +11,7 @@ The library currents hooks into the following events:
 * Registry Key Update
 * TCP Connection
 * TCP Disconnection
+* TCP Receive
 
 ## Requirements
 * .NET 5
@@ -32,7 +33,7 @@ dotnet add package WET.lib --version 0.3.0
 ## Roadmap
 Hooks for the following are planned:
 * File Create/Delete/Read/Update
-* TCP Receive/Send
+* TCP Send
 * UDP Connect/Disconnect/Receive/Send
 
 ## Usage
