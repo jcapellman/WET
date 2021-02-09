@@ -38,6 +38,8 @@ namespace WET.lib
 
         public event EventHandler<RegistryUpdateMonitorItem> OnRegistryUpdate;
 
+        public event EventHandler<TcpConnectMonitorItem> OnTcpConnect;
+
         private readonly List<BaseMonitor> _monitors;
         
         private object ParseData(TraceEvent eventData, MonitorTypes monitorType) =>
@@ -85,6 +87,9 @@ namespace WET.lib
                     case MonitorTypes.RegistryUpdate:
                         _session.Source.Kernel.RegistrySetValue += Kernel_RegistrySetValue;
                         break;
+                    case MonitorTypes.TcpConnect:
+                        _session.Source.Kernel.TcpIpConnect += Kernel_TcpIpConnect;
+                        break;
                 }
             }
 
@@ -98,6 +103,9 @@ namespace WET.lib
                 InitializeMonitor(sessionName, monitorTypes);
             }, _ctSource.Token);
         }
+        
+        private void Kernel_TcpIpConnect(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpConnectTraceData obj) =>
+            OnTcpConnect?.Invoke(this, (TcpConnectMonitorItem)ParseData(obj, MonitorTypes.TcpConnect));
 
         private void Kernel_RegistryCreate(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
             OnRegistryCreate?.Invoke(this, (RegistryCreateMonitorItem)ParseData(obj, MonitorTypes.RegistryCreate));
