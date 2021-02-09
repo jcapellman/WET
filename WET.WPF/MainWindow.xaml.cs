@@ -24,10 +24,19 @@ namespace WET.WPF
             _monitor.OnRegistryCreate += _monitor_OnRegistryCreate;
             _monitor.OnRegistryDelete += _monitor_OnRegistryDelete;
             _monitor.OnTcpConnect += _monitor_OnTcpConnect;
+            _monitor.OnTcpDisconnect += _monitor_OnTcpDisconnect;
 
             Closing += MainWindow_Closing;
 
-            _monitor.Start(monitorTypes: MonitorTypes.ProcessStart | MonitorTypes.RegistryUpdate | MonitorTypes.RegistryCreate | MonitorTypes.RegistryDelete | MonitorTypes.TcpConnect);
+            _monitor.Start(monitorTypes: MonitorTypes.TcpDisconnect | MonitorTypes.ProcessStart | MonitorTypes.RegistryUpdate | MonitorTypes.RegistryDelete | MonitorTypes.TcpConnect);
+        }
+
+        private void _monitor_OnTcpDisconnect(object sender, lib.MonitorItems.TcpDisconnectMonitorItem e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                txtBxDLLLoads.Text = txtBxDLLLoads.Text.Insert(0, $"Tcp Disconnect: {e.ProcessID}|{e.ProcessName}|{e.DestinationIP}:{e.DestinationPort}{Environment.NewLine}");
+            });
         }
 
         private void _monitor_OnTcpConnect(object sender, lib.MonitorItems.TcpConnectMonitorItem e)

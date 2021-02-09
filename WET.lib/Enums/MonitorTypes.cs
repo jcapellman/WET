@@ -15,6 +15,9 @@ namespace WET.lib.Enums
         RegistryUpdate = 128,
         RegistryDelete = 256,
         RegistryCreate = 512,
-        TcpConnect = 1024
+        TcpConnect = 1024,
+        TcpDisconnect = 2048,
+        TcpReceive = 4096,
+        TcpSend = 8192
     }
 }

@@ -7,7 +7,7 @@ using WET.lib.Monitors.Base;
 
 namespace WET.lib.Monitors
 {
-    public class TcpMonitor : BaseMonitor
+    public class TcpConnectMonitor : BaseMonitor
     {
         public override KernelTraceEventParser.Keywords KeyWordMap => KernelTraceEventParser.Keywords.NetworkTCPIP;
 
