@@ -32,6 +32,8 @@ namespace WET.lib
 
         public event EventHandler<ProcessStopMonitorItem> OnProcessStop;
 
+        public event EventHandler<RegistryUpdateMonitorItem> OnRegistryUpdate;
+
         private readonly List<BaseMonitor> _monitors;
         
         private object ParseData(TraceEvent eventData, MonitorTypes monitorType) =>
@@ -70,17 +72,21 @@ namespace WET.lib
                     case MonitorTypes.ProcessStop:
                         _session.Source.Kernel.ProcessStop += Kernel_ProcessStop;
                         break;
+                    case MonitorTypes.RegistryUpdate:
+                        _session.Source.Kernel.RegistrySetValue += Kernel_RegistrySetValue;
+                        break;
                 }
             }
 
             _session.Source.Process();
         }
 
-        private void Kernel_DiskIORead(Microsoft.Diagnostics.Tracing.Parsers.Kernel.DiskIOTraceData obj)
-        =>
-            OnFileRead?.Invoke(this, (FileReadMonitorItem)ParseData(obj, MonitorTypes.FileRead));
-            
+        private void Kernel_RegistrySetValue(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
+            OnRegistryUpdate?.Invoke(this, (RegistryUpdateMonitorItem)ParseData(obj, MonitorTypes.RegistryUpdate));
 
+        private void Kernel_DiskIORead(Microsoft.Diagnostics.Tracing.Parsers.Kernel.DiskIOTraceData obj) =>
+            OnFileRead?.Invoke(this, (FileReadMonitorItem)ParseData(obj, MonitorTypes.FileRead));
+        
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
             Task.Run(() =>
