@@ -39,33 +39,38 @@ namespace WET.lib
                 .Select(a => (BaseMonitor) Activator.CreateInstance(a)).ToList();
         }
 
+        private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes)
+        {
+            _session = new TraceEventSession(sessionName);
+
+            var enabledMonitors = _monitors.Where(a => monitorTypes.HasFlag(a.MonitorType)).ToList();
+
+            _session.EnableKernelProvider(enabledMonitors.Select(a => a.KeyWordMap).ToKeywords());
+
+            foreach (var monitor in enabledMonitors)
+            {
+                switch (monitor.MonitorType)
+                {
+                    case MonitorTypes.ImageLoad:
+                        _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
+                        break;
+                    case MonitorTypes.ProcessStart:
+                        _session.Source.Kernel.ProcessStart += Kernel_ProcessStart;
+                        break;
+                    case MonitorTypes.ProcessStop:
+                        _session.Source.Kernel.ProcessStop += Kernel_ProcessStop;
+                        break;
+                }
+            }
+
+            _session.Source.Process();
+        }
+
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
             Task.Run(() =>
             {
-                _session = new TraceEventSession(sessionName);
-
-                var enabledMonitors = _monitors.Where(a => monitorTypes.HasFlag(a.MonitorType)).ToList();
-
-                _session.EnableKernelProvider(enabledMonitors.Select(a => a.KeyWordMap).ToKeywords());
-
-                foreach (var monitor in enabledMonitors)
-                {
-                    switch (monitor.MonitorType)
-                    {
-                        case MonitorTypes.ImageLoad:
-                            _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
-                            break;
-                        case MonitorTypes.ProcessStart:
-                            _session.Source.Kernel.ProcessStart += Kernel_ProcessStart;
-                            break;
-                        case MonitorTypes.ProcessStop:
-                            _session.Source.Kernel.ProcessStop += Kernel_ProcessStop;
-                            break;
-                    }
-                }
-                
-                _session.Source.Process();
+                InitializeMonitor(sessionName, monitorTypes);
             }, _ctSource.Token);
         }
 
