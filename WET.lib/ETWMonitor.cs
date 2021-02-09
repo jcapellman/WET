@@ -32,6 +32,8 @@ namespace WET.lib
 
         public event EventHandler<ProcessStopMonitorItem> OnProcessStop;
 
+        public event EventHandler<RegistryCreateMonitorItem> OnRegistryCreate;
+
         public event EventHandler<RegistryUpdateMonitorItem> OnRegistryUpdate;
 
         private readonly List<BaseMonitor> _monitors;
@@ -72,6 +74,9 @@ namespace WET.lib
                     case MonitorTypes.ProcessStop:
                         _session.Source.Kernel.ProcessStop += Kernel_ProcessStop;
                         break;
+                    case MonitorTypes.RegistryCreate:
+                        _session.Source.Kernel.RegistryCreate += Kernel_RegistryCreate;
+                        break;
                     case MonitorTypes.RegistryUpdate:
                         _session.Source.Kernel.RegistrySetValue += Kernel_RegistrySetValue;
                         break;
@@ -81,12 +86,9 @@ namespace WET.lib
             _session.Source.Process();
         }
 
-        private void Kernel_RegistrySetValue(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
-            OnRegistryUpdate?.Invoke(this, (RegistryUpdateMonitorItem)ParseData(obj, MonitorTypes.RegistryUpdate));
+        private void Kernel_RegistryCreate(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
+            OnRegistryCreate?.Invoke(this, (RegistryCreateMonitorItem)ParseData(obj, MonitorTypes.RegistryCreate));
 
-        private void Kernel_DiskIORead(Microsoft.Diagnostics.Tracing.Parsers.Kernel.DiskIOTraceData obj) =>
-            OnFileRead?.Invoke(this, (FileReadMonitorItem)ParseData(obj, MonitorTypes.FileRead));
-        
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
             Task.Run(() =>
@@ -95,6 +97,12 @@ namespace WET.lib
             }, _ctSource.Token);
         }
 
+        private void Kernel_RegistrySetValue(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
+            OnRegistryUpdate?.Invoke(this, (RegistryUpdateMonitorItem)ParseData(obj, MonitorTypes.RegistryUpdate));
+
+        private void Kernel_DiskIORead(Microsoft.Diagnostics.Tracing.Parsers.Kernel.DiskIOTraceData obj) =>
+            OnFileRead?.Invoke(this, (FileReadMonitorItem)ParseData(obj, MonitorTypes.FileRead));
+        
         private void Kernel_ProcessStop(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj) =>
             OnProcessStop?.Invoke(this, (ProcessStopMonitorItem)ParseData(obj, MonitorTypes.ProcessStop));
 

@@ -21,10 +21,19 @@ namespace WET.WPF
             _monitor.OnProcessStop += _monitor_OnProcessStop;
             _monitor.OnFileRead += _monitor_OnFileRead;
             _monitor.OnRegistryUpdate += _monitor_OnRegistryUpdate;
+            _monitor.OnRegistryCreate += _monitor_OnRegistryCreate;
 
             Closing += MainWindow_Closing;
 
-            _monitor.Start(monitorTypes: MonitorTypes.ProcessStart | MonitorTypes.RegistryUpdate);
+            _monitor.Start(monitorTypes: MonitorTypes.ProcessStart | MonitorTypes.RegistryUpdate | MonitorTypes.RegistryCreate);
+        }
+
+        private void _monitor_OnRegistryCreate(object sender, lib.MonitorItems.RegistryCreateMonitorItem e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                txtBxDLLLoads.Text = txtBxDLLLoads.Text.Insert(0, $"Registry Create: {e.ProcessID}|{e.ProcessName}|{e.KeyName}{Environment.NewLine}");
+            });
         }
 
         private void _monitor_OnRegistryUpdate(object sender, lib.MonitorItems.RegistryUpdateMonitorItem e)
