@@ -6,6 +6,7 @@ namespace WET.lib.Enums
     public enum MonitorTypes
     {
         ImageLoad = 0,
-        ProcessStart = 1
+        ProcessStart = 1,
+        ProcessStop = 2
     }
 }
