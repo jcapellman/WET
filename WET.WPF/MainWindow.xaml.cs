@@ -22,10 +22,18 @@ namespace WET.WPF
             _monitor.OnFileRead += _monitor_OnFileRead;
             _monitor.OnRegistryUpdate += _monitor_OnRegistryUpdate;
             _monitor.OnRegistryCreate += _monitor_OnRegistryCreate;
-
+            _monitor.OnRegistryDelete += _monitor_OnRegistryDelete;
             Closing += MainWindow_Closing;
 
-            _monitor.Start(monitorTypes: MonitorTypes.ProcessStart | MonitorTypes.RegistryUpdate | MonitorTypes.RegistryCreate);
+            _monitor.Start(monitorTypes: MonitorTypes.ProcessStart | MonitorTypes.RegistryUpdate | MonitorTypes.RegistryCreate | MonitorTypes.RegistryDelete);
+        }
+
+        private void _monitor_OnRegistryDelete(object sender, lib.MonitorItems.RegistryDeleteMonitorItem e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                txtBxDLLLoads.Text = txtBxDLLLoads.Text.Insert(0, $"Registry Delete: {e.ProcessID}|{e.ProcessName}{Environment.NewLine}");
+            });
         }
 
         private void _monitor_OnRegistryCreate(object sender, lib.MonitorItems.RegistryCreateMonitorItem e)

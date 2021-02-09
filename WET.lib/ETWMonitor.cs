@@ -34,6 +34,8 @@ namespace WET.lib
 
         public event EventHandler<RegistryCreateMonitorItem> OnRegistryCreate;
 
+        public event EventHandler<RegistryDeleteMonitorItem> OnRegistryDelete;
+
         public event EventHandler<RegistryUpdateMonitorItem> OnRegistryUpdate;
 
         private readonly List<BaseMonitor> _monitors;
@@ -77,6 +79,9 @@ namespace WET.lib
                     case MonitorTypes.RegistryCreate:
                         _session.Source.Kernel.RegistryCreate += Kernel_RegistryCreate;
                         break;
+                    case MonitorTypes.RegistryDelete:
+                        _session.Source.Kernel.RegistryDelete += Kernel_RegistryDelete;
+                        break;
                     case MonitorTypes.RegistryUpdate:
                         _session.Source.Kernel.RegistrySetValue += Kernel_RegistrySetValue;
                         break;
@@ -85,10 +90,7 @@ namespace WET.lib
 
             _session.Source.Process();
         }
-
-        private void Kernel_RegistryCreate(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
-            OnRegistryCreate?.Invoke(this, (RegistryCreateMonitorItem)ParseData(obj, MonitorTypes.RegistryCreate));
-
+        
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
             Task.Run(() =>
@@ -97,6 +99,12 @@ namespace WET.lib
             }, _ctSource.Token);
         }
 
+        private void Kernel_RegistryCreate(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
+            OnRegistryCreate?.Invoke(this, (RegistryCreateMonitorItem)ParseData(obj, MonitorTypes.RegistryCreate));
+        
+        private void Kernel_RegistryDelete(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
+            OnRegistryDelete?.Invoke(this, (RegistryDeleteMonitorItem)ParseData(obj, MonitorTypes.RegistryDelete));
+        
         private void Kernel_RegistrySetValue(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
             OnRegistryUpdate?.Invoke(this, (RegistryUpdateMonitorItem)ParseData(obj, MonitorTypes.RegistryUpdate));
 
