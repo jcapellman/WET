@@ -33,6 +33,18 @@ private void Monitor_OnImageLoad(object sender, lib.MonitorItems.ImageLoadMonito
     Console.WriteLine($"{e.ProcessID}|{e.ThreadID}|{e.FileName}{Environment.NewLine}");
 }
 ```
+### DLL Unload Hook
+To get an event hook on every DLL Unload simply add a NuGet reference and the code below:
+```
+var monitor = new ETWMonitor();
+
+monitor.OnImageUnload += _monitor_OnImageUnload;
+  
+private void _monitor_OnImageUnload(object sender, lib.MonitorItems.ImageUnloadMonitorItem e)
+{
+    Console.WriteLine($"DLL Unload: {e.ProcessID}|{e.ThreadID}|{e.FileName}{Environment.NewLine}");
+}
+```
 ### Process Start Hook
 To get an event hook on every DLL Load simply add a NuGet reference and the code below:
 ```
@@ -43,6 +55,18 @@ monitor.OnProcessStart += _monitor_OnProcessStart;
 private void _monitor_OnProcessStart(object sender, lib.MonitorItems.ProcessStartMonitorItem e)
 {
     Console.WriteLine($"Process Start: {e.ParentProcessID}|{e.FileName}|{e.CommandLineArguments}{Environment.NewLine}");
+}
+```
+### Process Stop Hook
+To get an event hook on every Process Stop simply add a NuGet reference and the code below:
+```
+var monitor = new ETWMonitor();
+
+monitor.OnProcessStop += _monitor_OnProcessStop
+  
+private void _monitor_OnProcessStop(object sender, lib.MonitorItems.ProcessStopMonitorItem e)
+{
+    Console.WriteLine($"Process Stop: {e.ProcessID}|{e.FileName}{Environment.NewLine}");
 }
 ```
 ### Registry Create Hook
