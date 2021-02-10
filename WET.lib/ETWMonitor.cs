@@ -44,6 +44,9 @@ namespace WET.lib
 
         public event EventHandler<TcpReceiveMonitorItem> OnTcpReceive;
 
+        public event EventHandler<TcpSendMonitorItem> OnTcpSend;
+
+
         private readonly List<BaseMonitor> _monitors;
         
         private object ParseData(TraceEvent eventData, MonitorTypes monitorType) =>
@@ -100,12 +103,15 @@ namespace WET.lib
                     case MonitorTypes.TcpReceive:
                         _session.Source.Kernel.TcpIpRecv += Kernel_TcpIpRecv;
                         break;
+                    case MonitorTypes.TcpSend:
+                        _session.Source.Kernel.TcpIpSend += Kernel_TcpIpSend;
+                        break;
                 }
             }
 
             _session.Source.Process();
         }
-        
+
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
             Task.Run(() =>
@@ -122,6 +128,9 @@ namespace WET.lib
 
         private void Kernel_TcpIpRecv(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpTraceData obj) =>
             OnTcpReceive?.Invoke(this, (TcpReceiveMonitorItem)ParseData(obj, MonitorTypes.TcpReceive));
+        
+        private void Kernel_TcpIpSend(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpSendTraceData obj) =>
+            OnTcpSend?.Invoke(this, (TcpSendMonitorItem)ParseData(obj, MonitorTypes.TcpSend));
 
         private void Kernel_RegistryCreate(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
             OnRegistryCreate?.Invoke(this, (RegistryCreateMonitorItem)ParseData(obj, MonitorTypes.RegistryCreate));
