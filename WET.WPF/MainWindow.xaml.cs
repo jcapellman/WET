@@ -27,10 +27,19 @@ namespace WET.WPF
             _monitor.OnTcpConnect += _monitor_OnTcpConnect;
             _monitor.OnTcpDisconnect += _monitor_OnTcpDisconnect;
             _monitor.OnTcpReceive += _monitor_OnTcpReceive;
+            _monitor.OnTcpSend += _monitor_OnTcpSend;
 
             Closing += MainWindow_Closing;
 
             _monitor.Start(monitorTypes: MonitorTypes.TcpDisconnect | MonitorTypes.TcpReceive | MonitorTypes.ProcessStart | MonitorTypes.RegistryUpdate | MonitorTypes.RegistryDelete | MonitorTypes.TcpConnect);
+        }
+
+        private void _monitor_OnTcpSend(object sender, lib.MonitorItems.TcpSendMonitorItem e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                txtBxDLLLoads.Text = txtBxDLLLoads.Text.Insert(0, $"TCP Send: {e.ProcessID}|{e.DestinationIP}:{e.DestinationPort}|{e.Size}{Environment.NewLine}");
+            });
         }
 
         private void _monitor_OnTcpReceive(object sender, lib.MonitorItems.TcpReceiveMonitorItem e)
