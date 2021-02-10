@@ -1,7 +1,7 @@
 # WET (Windows Event Tracing) Library
 The purpose of this library is to hook into various Event Tracing events on Windows with just 2 lines of code for the integrator.
 
-The library currents hooks into the following events:
+The library currently hooks into the following events:
 * DLL Load
 * DLL Unload
 * Process Start
@@ -12,6 +12,7 @@ The library currents hooks into the following events:
 * TCP Connection
 * TCP Disconnection
 * TCP Receive
+* TCP Send
 
 ## Requirements
 * .NET 5
@@ -33,12 +34,12 @@ dotnet add package WET.lib --version 0.3.0
 ## Roadmap
 Hooks for the following are planned:
 * File Create/Delete/Read/Update
-* TCP Send
 * UDP Connect/Disconnect/Receive/Send
 
 ## Usage
 The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.3.0 - both the DLL Load and Process Start hooks are enabled).
 
+## Examples
 ### DLL Load Hook
 To get an event hook on every DLL Load simply add a NuGet reference and the code below:
 ```
@@ -133,6 +134,42 @@ monitor.OnTcpConnect += _monitor_OnTcpConnect;
 private void _monitor_OnTcpConnect(object sender, lib.MonitorItems.TcpConnectMonitorItem e)
 {
     Console.WriteLine($"Tcp Connect: {e.ProcessID}|{e.ProcessName}|{e.DestinationIP}:{e.DestinationPort}{Environment.NewLine}");
+}
+```
+### TCP Disconnect Hook
+To get an event hook on every TCP Disconnect event simply add a NuGet reference and the code below:
+```
+var monitor = new ETWMonitor();
+
+monitor.OnTcpDisconnect += _monitor_OnTcpDisconnect;
+  
+private void _monitor_OnTcpDisconnect(object sender, lib.MonitorItems.TcpDisconnectMonitorItem e)
+{
+    Console.WriteLine($"Tcp Disconnect: {e.ProcessID}|{e.ProcessName}|{e.DestinationIP}:{e.DestinationPort}{Environment.NewLine}");
+}
+```
+### TCP Send Hook
+To get an event hook on every TCP Send event simply add a NuGet reference and the code below:
+```
+var monitor = new ETWMonitor();
+
+monitor.OnTcpSend += _monitor_OnTcpSend;
+  
+private void _monitor_OnTcpSend(object sender, lib.MonitorItems.TcpSendMonitorItem e)
+{
+    Console.WriteLine($"Tcp Send: {e.ProcessID}|{e.ProcessName}|{e.DestinationIP}:{e.DestinationPort}{Environment.NewLine}");
+}
+```
+### TCP Receive Hook
+To get an event hook on every TCP Receive event simply add a NuGet reference and the code below:
+```
+var monitor = new ETWMonitor();
+
+monitor.OnTcpReceive += _monitor_OnTcpReceive;
+  
+private void _monitor_OnTcpReceive(object sender, lib.MonitorItems.TcpReceiveMonitorItem e)
+{
+    Console.WriteLine($"Tcp Receive: {e.ProcessID}|{e.ProcessName}|{e.DestinationIP}:{e.DestinationPort}{Environment.NewLine}");
 }
 ```
 ### Notes
