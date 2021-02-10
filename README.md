@@ -1,7 +1,7 @@
 # WET (Windows Event Tracing) Library
 The purpose of this library is to hook into various Event Tracing events on Windows with just 2 lines of code for the integrator.
 
-The library currents hooks into the following events:
+The library currently hooks into the following events:
 * DLL Load
 * DLL Unload
 * Process Start
@@ -39,6 +39,7 @@ Hooks for the following are planned:
 ## Usage
 The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.3.0 - both the DLL Load and Process Start hooks are enabled).
 
+## Examples
 ### DLL Load Hook
 To get an event hook on every DLL Load simply add a NuGet reference and the code below:
 ```
