@@ -19,8 +19,8 @@ namespace WET.lib.Monitors
 
             return new TcpReceiveMonitorItem
             {
-                DestinationIP = obj.daddr.ToString(),
-                DestinationPort = obj.dport,
+                SenderIP = obj.saddr.ToString(),
+                SenderPort = obj.sport,
                 Size = obj.size,
                 ProcessID = obj.ProcessID
             };
