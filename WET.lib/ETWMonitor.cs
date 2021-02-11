@@ -37,7 +37,8 @@ namespace WET.lib
         {
             _session = new TraceEventSession(sessionName);
 
-            var enabledMonitors = _monitors.Where(a => monitorTypes.HasFlag(a.MonitorType)).ToList();
+            var enabledMonitors = monitorTypes == MonitorTypes.All ? 
+                _monitors : _monitors.Where(a => monitorTypes.HasFlag(a.MonitorType)).ToList();
 
             _session.EnableKernelProvider(enabledMonitors.Select(a => a.KeyWordMap).ToKeywords());
 
@@ -93,7 +94,7 @@ namespace WET.lib
             _session.Source.Process();
         }
 
-        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
+        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All)
         {
             Task.Run(() =>
             {

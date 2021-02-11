@@ -5,21 +5,22 @@ namespace WET.lib.Enums
     [Flags]
     public enum MonitorTypes
     {
-        ImageLoad = 1,
-        ImageUnload = 2,
-        ProcessStart = 4,
-        ProcessStop = 8,
-        FileRead = 16,
-        FileWrite = 32,
-        FileDelete = 64,
-        RegistryUpdate = 128,
-        RegistryDelete = 256,
-        RegistryCreate = 512,
-        TcpConnect = 1024,
-        TcpDisconnect = 2048,
-        TcpReceive = 4096,
-        TcpSend = 8192,
-        UdpSend = 16384,
-        UdpReceive = 32768
+        All = 1,
+        ImageLoad = 2,
+        ImageUnload = 4,
+        ProcessStart = 8,
+        ProcessStop = 16,
+        FileRead = 32,
+        FileWrite = 64,
+        FileDelete = 128,
+        RegistryUpdate = 256,
+        RegistryDelete = 512,
+        RegistryCreate = 1024,
+        TcpConnect = 2048,
+        TcpDisconnect = 4096,
+        TcpReceive = 8192,
+        TcpSend = 16384,
+        UdpSend = 32768,
+        UdpReceive = 65536
     }
 }
