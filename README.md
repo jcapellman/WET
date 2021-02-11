@@ -13,6 +13,8 @@ The library currently hooks into the following events:
 * TCP Disconnection
 * TCP Receive
 * TCP Send
+* UDP Receive
+* UDP Send
 
 ## Requirements
 * .NET 5
@@ -34,7 +36,6 @@ dotnet add package WET.lib --version 0.3.0
 ## Roadmap
 Hooks for the following are planned:
 * File Create/Delete/Read/Update
-* UDP Connect/Disconnect/Receive/Send
 
 ## Usage
 The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.3.0 - both the DLL Load and Process Start hooks are enabled).
