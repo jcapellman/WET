@@ -48,6 +48,8 @@ namespace WET.lib
 
         public event EventHandler<UdpSendMonitorItem> OnUdpSend;
 
+        public event EventHandler<UdpReceiveMonitorItem> OnUdpReceive;
+
         private readonly List<BaseMonitor> _monitors;
         
         private object ParseData(TraceEvent eventData, MonitorTypes monitorType) =>
@@ -110,12 +112,15 @@ namespace WET.lib
                     case MonitorTypes.UdpSend:
                         _session.Source.Kernel.UdpIpSend += Kernel_UdpIpSend;
                         break;
+                    case MonitorTypes.UdpReceive:
+                        _session.Source.Kernel.UdpIpRecv += Kernel_UdpIpRecv;
+                        break;
                 }
             }
 
             _session.Source.Process();
         }
-        
+
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
             Task.Run(() =>
@@ -123,6 +128,9 @@ namespace WET.lib
                 InitializeMonitor(sessionName, monitorTypes);
             }, _ctSource.Token);
         }
+        
+        private void Kernel_UdpIpRecv(Microsoft.Diagnostics.Tracing.Parsers.Kernel.UdpIpTraceData obj) =>
+            OnUdpReceive?.Invoke(this, (UdpReceiveMonitorItem)ParseData(obj, MonitorTypes.UdpReceive));
 
         private void Kernel_UdpIpSend(Microsoft.Diagnostics.Tracing.Parsers.Kernel.UdpIpTraceData obj) =>
             OnUdpSend?.Invoke(this, (UdpSendMonitorItem)ParseData(obj, MonitorTypes.UdpSend));
