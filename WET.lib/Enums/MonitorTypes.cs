@@ -18,6 +18,8 @@ namespace WET.lib.Enums
         TcpConnect = 1024,
         TcpDisconnect = 2048,
         TcpReceive = 4096,
-        TcpSend = 8192
+        TcpSend = 8192,
+        UdpSend = 16384,
+        UdpReceive = 32768
     }
 }

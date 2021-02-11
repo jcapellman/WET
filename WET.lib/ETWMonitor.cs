@@ -46,6 +46,7 @@ namespace WET.lib
 
         public event EventHandler<TcpSendMonitorItem> OnTcpSend;
 
+        public event EventHandler<UdpSendMonitorItem> OnUdpSend;
 
         private readonly List<BaseMonitor> _monitors;
         
@@ -106,12 +107,15 @@ namespace WET.lib
                     case MonitorTypes.TcpSend:
                         _session.Source.Kernel.TcpIpSend += Kernel_TcpIpSend;
                         break;
+                    case MonitorTypes.UdpSend:
+                        _session.Source.Kernel.UdpIpSend += Kernel_UdpIpSend;
+                        break;
                 }
             }
 
             _session.Source.Process();
         }
-
+        
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.ImageLoad | MonitorTypes.ProcessStart)
         {
             Task.Run(() =>
@@ -119,7 +123,10 @@ namespace WET.lib
                 InitializeMonitor(sessionName, monitorTypes);
             }, _ctSource.Token);
         }
-        
+
+        private void Kernel_UdpIpSend(Microsoft.Diagnostics.Tracing.Parsers.Kernel.UdpIpTraceData obj) =>
+            OnUdpSend?.Invoke(this, (UdpSendMonitorItem)ParseData(obj, MonitorTypes.UdpSend));
+
         private void Kernel_TcpIpConnect(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpConnectTraceData obj) =>
             OnTcpConnect?.Invoke(this, (TcpConnectMonitorItem)ParseData(obj, MonitorTypes.TcpConnect));
 
