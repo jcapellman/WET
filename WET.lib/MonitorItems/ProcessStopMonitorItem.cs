@@ -1,9 +1,9 @@
-﻿namespace WET.lib.MonitorItems
-{
-    public class ProcessStopMonitorItem
-    {
-        public int ProcessID { get; internal set; }
+﻿using WET.lib.MonitorItems.Base;
 
+namespace WET.lib.MonitorItems
+{
+    public class ProcessStopMonitorItem : BaseMonitorItem
+    {
         public string FileName { get; internal set; }
     }
 }

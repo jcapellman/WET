@@ -1,9 +1,8 @@
-﻿namespace WET.lib.MonitorItems
-{
-    public class RegistryDeleteMonitorItem
-    {
-        public int ProcessID { get; internal set; }
+﻿using WET.lib.MonitorItems.Base;
 
-        public string ProcessName { get; internal set; }
+namespace WET.lib.MonitorItems
+{
+    public class RegistryDeleteMonitorItem : BaseMonitorItem
+    {
     }
 }

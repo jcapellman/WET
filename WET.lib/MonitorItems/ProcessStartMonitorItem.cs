@@ -1,6 +1,8 @@
-﻿namespace WET.lib.MonitorItems
+﻿using WET.lib.MonitorItems.Base;
+
+namespace WET.lib.MonitorItems
 {
-    public class ProcessStartMonitorItem
+    public class ProcessStartMonitorItem : BaseMonitorItem
     {
         public string FileName { get; internal set; }
 

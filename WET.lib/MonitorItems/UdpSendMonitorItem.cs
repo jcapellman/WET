@@ -1,13 +1,11 @@
-﻿namespace WET.lib.MonitorItems
+﻿using WET.lib.MonitorItems.Base;
+
+namespace WET.lib.MonitorItems
 {
-    public class UdpSendMonitorItem
+    public class UdpSendMonitorItem : BaseMonitorItem
     {
-        public int ProcessID { get; internal set; }
-
         public int Size { get; internal set; }
-
-        public string ProcessName { get; internal set; }
-
+        
         public string DestinationIP { get; internal set; }
 
         public int DestinationPort { get; internal set; }

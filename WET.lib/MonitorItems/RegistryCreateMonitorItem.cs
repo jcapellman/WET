@@ -1,11 +1,9 @@
-﻿namespace WET.lib.MonitorItems
+﻿using WET.lib.MonitorItems.Base;
+
+namespace WET.lib.MonitorItems
 {
-    public class RegistryCreateMonitorItem
+    public class RegistryCreateMonitorItem : BaseMonitorItem
     {
-        public int ProcessID { get; internal set; }
-
-        public string ProcessName { get; internal set; }
-
         public string KeyName { get; internal set; }
     }
 }
