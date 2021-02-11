@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Session;
 
+using WET.lib.Containers;
 using WET.lib.Enums;
 using WET.lib.Extensions;
-using WET.lib.MonitorItems;
 using WET.lib.Monitors.Base;
 
 namespace WET.lib
@@ -22,39 +23,10 @@ namespace WET.lib
 
         private TraceEventSession _session;
 
-        public event EventHandler<FileReadMonitorItem> OnFileRead; 
-
-        public event EventHandler<ImageLoadMonitorItem> OnImageLoad;
-
-        public event EventHandler<ImageUnloadMonitorItem> OnImageUnload;
-
-        public event EventHandler<ProcessStartMonitorItem> OnProcessStart;
-
-        public event EventHandler<ProcessStopMonitorItem> OnProcessStop;
-
-        public event EventHandler<RegistryCreateMonitorItem> OnRegistryCreate;
-
-        public event EventHandler<RegistryDeleteMonitorItem> OnRegistryDelete;
-
-        public event EventHandler<RegistryUpdateMonitorItem> OnRegistryUpdate;
-
-        public event EventHandler<TcpConnectMonitorItem> OnTcpConnect;
-
-        public event EventHandler<TcpDisconnectMonitorItem> OnTcpDisconnect;
-
-        public event EventHandler<TcpReceiveMonitorItem> OnTcpReceive;
-
-        public event EventHandler<TcpSendMonitorItem> OnTcpSend;
-
-        public event EventHandler<UdpSendMonitorItem> OnUdpSend;
-
-        public event EventHandler<UdpReceiveMonitorItem> OnUdpReceive;
+        public event EventHandler<ETWEventContainerItem> OnEvent; 
 
         private readonly List<BaseMonitor> _monitors;
         
-        private object ParseData(TraceEvent eventData, MonitorTypes monitorType) =>
-            _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.ParseTraceEvent(eventData);
-
         public ETWMonitor()
         {
             _monitors = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
@@ -128,48 +100,66 @@ namespace WET.lib
                 InitializeMonitor(sessionName, monitorTypes);
             }, _ctSource.Token);
         }
-        
+
+        private void ParseEvent(MonitorTypes monitorType, TraceEvent item)
+        {
+            var data = _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.ParseTraceEvent(item);
+
+            if (data == null)
+            {
+                throw new Exception($"{monitorType} could not be mapped");
+            }
+
+            OnEvent?.Invoke(this, new ETWEventContainerItem
+            {
+                ID = Guid.NewGuid(),
+                MonitorType = monitorType,
+                JSON = JsonSerializer.Serialize(data),
+                Timestamp = DateTimeOffset.Now
+            });
+        }
+
         private void Kernel_UdpIpRecv(Microsoft.Diagnostics.Tracing.Parsers.Kernel.UdpIpTraceData obj) =>
-            OnUdpReceive?.Invoke(this, (UdpReceiveMonitorItem)ParseData(obj, MonitorTypes.UdpReceive));
+            ParseEvent(MonitorTypes.UdpReceive, obj);
 
         private void Kernel_UdpIpSend(Microsoft.Diagnostics.Tracing.Parsers.Kernel.UdpIpTraceData obj) =>
-            OnUdpSend?.Invoke(this, (UdpSendMonitorItem)ParseData(obj, MonitorTypes.UdpSend));
+            ParseEvent(MonitorTypes.UdpSend, obj);
 
         private void Kernel_TcpIpConnect(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpConnectTraceData obj) =>
-            OnTcpConnect?.Invoke(this, (TcpConnectMonitorItem)ParseData(obj, MonitorTypes.TcpConnect));
+            ParseEvent(MonitorTypes.TcpConnect, obj);
 
         private void Kernel_TcpIpDisconnect(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpTraceData obj) =>
-            OnTcpDisconnect?.Invoke(this, (TcpDisconnectMonitorItem)ParseData(obj, MonitorTypes.TcpDisconnect));
+            ParseEvent(MonitorTypes.TcpDisconnect, obj);
 
         private void Kernel_TcpIpRecv(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpTraceData obj) =>
-            OnTcpReceive?.Invoke(this, (TcpReceiveMonitorItem)ParseData(obj, MonitorTypes.TcpReceive));
-        
+            ParseEvent(MonitorTypes.TcpReceive, obj);
+
         private void Kernel_TcpIpSend(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpSendTraceData obj) =>
-            OnTcpSend?.Invoke(this, (TcpSendMonitorItem)ParseData(obj, MonitorTypes.TcpSend));
+            ParseEvent(MonitorTypes.TcpSend, obj);
 
         private void Kernel_RegistryCreate(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
-            OnRegistryCreate?.Invoke(this, (RegistryCreateMonitorItem)ParseData(obj, MonitorTypes.RegistryCreate));
-        
+            ParseEvent(MonitorTypes.RegistryCreate, obj);
+
         private void Kernel_RegistryDelete(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
-            OnRegistryDelete?.Invoke(this, (RegistryDeleteMonitorItem)ParseData(obj, MonitorTypes.RegistryDelete));
-        
+            ParseEvent(MonitorTypes.RegistryDelete, obj);
+
         private void Kernel_RegistrySetValue(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
-            OnRegistryUpdate?.Invoke(this, (RegistryUpdateMonitorItem)ParseData(obj, MonitorTypes.RegistryUpdate));
+            ParseEvent(MonitorTypes.RegistryUpdate, obj);
 
         private void Kernel_DiskIORead(Microsoft.Diagnostics.Tracing.Parsers.Kernel.DiskIOTraceData obj) =>
-            OnFileRead?.Invoke(this, (FileReadMonitorItem)ParseData(obj, MonitorTypes.FileRead));
-        
-        private void Kernel_ProcessStop(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj) =>
-            OnProcessStop?.Invoke(this, (ProcessStopMonitorItem)ParseData(obj, MonitorTypes.ProcessStop));
+            ParseEvent(MonitorTypes.FileRead, obj);
 
-        private void Kernel_ProcessStart(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj) => 
-            OnProcessStart?.Invoke(this, (ProcessStartMonitorItem)ParseData(obj, MonitorTypes.ProcessStart));
+        private void Kernel_ProcessStop(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj) =>
+            ParseEvent(MonitorTypes.ProcessStop, obj);
+
+        private void Kernel_ProcessStart(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ProcessTraceData obj) =>
+            ParseEvent(MonitorTypes.ProcessStart, obj);
 
         private void Kernel_ImageLoad(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ImageLoadTraceData obj) =>
-            OnImageLoad?.Invoke(this, (ImageLoadMonitorItem)ParseData(obj, MonitorTypes.ImageLoad));
+            ParseEvent(MonitorTypes.ImageLoad, obj);
 
         private void Kernel_ImageUnload(Microsoft.Diagnostics.Tracing.Parsers.Kernel.ImageLoadTraceData obj) =>
-            OnImageUnload?.Invoke(this, (ImageUnloadMonitorItem)ParseData(obj, MonitorTypes.ImageUnload));
+            ParseEvent(MonitorTypes.ImageUnload, obj);
 
         public void Stop()
         {
