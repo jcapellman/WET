@@ -26,15 +26,19 @@ namespace WET.lib
         public event EventHandler<ETWEventContainerItem> OnEvent; 
 
         private readonly List<BaseMonitor> _monitors;
-        
+
+        private OutputFormat _selectedOutputFormat;
+
         public ETWMonitor()
         {
             _monitors = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
                 .Select(a => (BaseMonitor) Activator.CreateInstance(a)).ToList();
         }
 
-        private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes)
+        private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat)
         {
+            _selectedOutputFormat = outputFormat;
+
             _session = new TraceEventSession(sessionName);
 
             var enabledMonitors = monitorTypes == MonitorTypes.All ? 
@@ -94,11 +98,11 @@ namespace WET.lib
             _session.Source.Process();
         }
 
-        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All)
+        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, OutputFormat outputFormat = OutputFormat.JSON)
         {
             Task.Run(() =>
             {
-                InitializeMonitor(sessionName, monitorTypes);
+                InitializeMonitor(sessionName, monitorTypes, outputFormat);
             }, _ctSource.Token);
         }
 
@@ -111,11 +115,23 @@ namespace WET.lib
                 throw new Exception($"{monitorType} could not be mapped");
             }
 
+            var payload = string.Empty;
+
+            switch (_selectedOutputFormat)
+            {
+                case OutputFormat.JSON:
+                    payload = JsonSerializer.Serialize(data);
+                    break;
+                case OutputFormat.CSV:
+                    payload = ""; // TODO
+                    break;
+            }
+
             OnEvent?.Invoke(this, new ETWEventContainerItem
             {
                 ID = Guid.NewGuid(),
                 MonitorType = monitorType,
-                JSON = JsonSerializer.Serialize(data),
+                Payload = payload,
                 Timestamp = DateTimeOffset.Now
             });
         }
