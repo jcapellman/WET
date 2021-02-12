@@ -26,7 +26,7 @@ namespace WET.WPF
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                txtBxDLLLoads.Text = txtBxDLLLoads.Text.Insert(0, $"{e.MonitorType}: {e.JSON}{Environment.NewLine}");
+                txtBxDLLLoads.Text = txtBxDLLLoads.Text.Insert(0, $"{e.MonitorType}: {e.Payload}{Environment.NewLine}");
             });
         }
         
