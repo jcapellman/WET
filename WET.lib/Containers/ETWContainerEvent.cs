@@ -12,6 +12,8 @@ namespace WET.lib.Containers
 
         public MonitorTypes MonitorType { get; internal set; }
 
-        public string JSON { get; internal set; }
+        public OutputFormat Format { get; internal set; }
+
+        public string Payload { get; internal set; }
     }
 }
