@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,6 +11,7 @@ using WET.lib.Containers;
 using WET.lib.Enums;
 using WET.lib.Extensions;
 using WET.lib.Monitors.Base;
+using WET.lib.OutputFormatters.Base;
 
 namespace WET.lib
 {
@@ -27,17 +27,22 @@ namespace WET.lib
 
         private readonly List<BaseMonitor> _monitors;
 
-        private OutputFormat _selectedOutputFormat;
+        private readonly List<BaseOutputFormatter> _outputFormatters;
+
+        private BaseOutputFormatter _selectedOutputFormatter;
 
         public ETWMonitor()
         {
             _monitors = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
                 .Select(a => (BaseMonitor) Activator.CreateInstance(a)).ToList();
+
+            _outputFormatters = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseOutputFormatter))
+                .Select(a => (BaseOutputFormatter) Activator.CreateInstance(a)).ToList();
         }
 
         private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat)
         {
-            _selectedOutputFormat = outputFormat;
+            _selectedOutputFormatter = _outputFormatters.FirstOrDefault(a => a.Formatter == outputFormat);
 
             _session = new TraceEventSession(sessionName);
 
@@ -114,24 +119,12 @@ namespace WET.lib
             {
                 throw new Exception($"{monitorType} could not be mapped");
             }
-
-            var payload = string.Empty;
-
-            switch (_selectedOutputFormat)
-            {
-                case OutputFormat.JSON:
-                    payload = JsonSerializer.Serialize(data);
-                    break;
-                case OutputFormat.CSV:
-                    payload = ""; // TODO
-                    break;
-            }
-
+            
             OnEvent?.Invoke(this, new ETWEventContainerItem
             {
                 ID = Guid.NewGuid(),
                 MonitorType = monitorType,
-                Payload = payload,
+                Payload = _selectedOutputFormatter.ConvertData(data),
                 Timestamp = DateTimeOffset.Now
             });
         }
