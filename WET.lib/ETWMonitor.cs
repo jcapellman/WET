@@ -50,7 +50,7 @@ namespace WET.lib
                 _monitors : _monitors.Where(a => monitorTypes.HasFlag(a.MonitorType)).ToList();
 
             _session.EnableKernelProvider(enabledMonitors.Select(a => a.KeyWordMap).ToKeywords());
-
+            
             foreach (var monitor in enabledMonitors)
             {
                 switch (monitor.MonitorType)
@@ -72,6 +72,9 @@ namespace WET.lib
                         break;
                     case MonitorTypes.RegistryCreate:
                         _session.Source.Kernel.RegistryCreate += Kernel_RegistryCreate;
+                        break;
+                    case MonitorTypes.RegistryOpen:
+                        _session.Source.Kernel.RegistryOpen += Kernel_RegistryOpen;
                         break;
                     case MonitorTypes.RegistryDelete:
                         _session.Source.Kernel.RegistryDelete += Kernel_RegistryDelete;
@@ -152,6 +155,9 @@ namespace WET.lib
 
         private void Kernel_RegistryDelete(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
             ParseEvent(MonitorTypes.RegistryDelete, obj);
+
+        private void Kernel_RegistryOpen(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
+            ParseEvent(MonitorTypes.RegistryOpen, obj);
 
         private void Kernel_RegistrySetValue(Microsoft.Diagnostics.Tracing.Parsers.Kernel.RegistryTraceData obj) =>
             ParseEvent(MonitorTypes.RegistryUpdate, obj);

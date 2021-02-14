@@ -21,6 +21,7 @@ namespace WET.lib.Enums
         TcpReceive = 8192,
         TcpSend = 16384,
         UdpSend = 32768,
-        UdpReceive = 65536
+        UdpReceive = 65536,
+        RegistryOpen = 131072
     }
 }
