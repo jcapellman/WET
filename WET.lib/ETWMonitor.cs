@@ -10,6 +10,7 @@ using Microsoft.Diagnostics.Tracing.Session;
 using WET.lib.Containers;
 using WET.lib.Enums;
 using WET.lib.Extensions;
+using WET.lib.Interfaces;
 using WET.lib.Monitors.Base;
 using WET.lib.OutputFormatters.Base;
 
@@ -31,6 +32,8 @@ namespace WET.lib
 
         private BaseOutputFormatter _selectedOutputFormatter;
 
+        private IEventFilter _eventFilter;
+
         public ETWMonitor()
         {
             _monitors = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
@@ -40,8 +43,10 @@ namespace WET.lib
                 .Select(a => (BaseOutputFormatter) Activator.CreateInstance(a)).ToList();
         }
 
-        private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat)
+        private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat, IEventFilter eventFilter)
         {
+            _eventFilter = eventFilter;
+
             _selectedOutputFormatter = _outputFormatters.FirstOrDefault(a => a.Formatter == outputFormat);
 
             _session = new TraceEventSession(sessionName);
@@ -106,11 +111,11 @@ namespace WET.lib
             _session.Source.Process();
         }
 
-        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, OutputFormat outputFormat = OutputFormat.JSON)
+        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null)
         {
             Task.Run(() =>
             {
-                InitializeMonitor(sessionName, monitorTypes, outputFormat);
+                InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter);
             }, _ctSource.Token);
         }
 
@@ -122,7 +127,14 @@ namespace WET.lib
             {
                 throw new Exception($"{monitorType} could not be mapped");
             }
-            
+
+            if (_eventFilter != null && _eventFilter.IsFilteredOut(monitorType, data))
+            {
+                // Filtered out based on the implementation - do not fire the event
+
+                return;
+            }
+
             OnEvent?.Invoke(this, new ETWEventContainerItem
             {
                 ID = Guid.NewGuid(),
