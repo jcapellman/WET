@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using WET.lib.Enums;
 using WET.lib.OutputFormatters.Base;
@@ -11,6 +12,11 @@ namespace WET.lib.OutputFormatters
 
         public override string ConvertData(object item)
         {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
             var properties = item.GetType().GetProperties();
 
             var values = new List<string>();
