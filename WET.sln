@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WET.lib", "WET.lib\WET.lib.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WET.wpf", "WET.WPF\WET.wpf.csproj", "{39C98B2E-97B7-40BD-8BAC-DA7C4E297DB2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WET.UnitTests", "WET.UnitTests\WET.UnitTests.csproj", "{B9F67881-5452-443F-80B1-611DF5034C02}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,14 @@ Global
 		{39C98B2E-97B7-40BD-8BAC-DA7C4E297DB2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{39C98B2E-97B7-40BD-8BAC-DA7C4E297DB2}.Release|x64.ActiveCfg = Release|x64
 		{39C98B2E-97B7-40BD-8BAC-DA7C4E297DB2}.Release|x64.Build.0 = Release|x64
+		{B9F67881-5452-443F-80B1-611DF5034C02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9F67881-5452-443F-80B1-611DF5034C02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9F67881-5452-443F-80B1-611DF5034C02}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B9F67881-5452-443F-80B1-611DF5034C02}.Debug|x64.Build.0 = Debug|Any CPU
+		{B9F67881-5452-443F-80B1-611DF5034C02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9F67881-5452-443F-80B1-611DF5034C02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9F67881-5452-443F-80B1-611DF5034C02}.Release|x64.ActiveCfg = Release|Any CPU
+		{B9F67881-5452-443F-80B1-611DF5034C02}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
