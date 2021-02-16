@@ -121,7 +121,7 @@ namespace WET.lib
 
         private void ParseEvent(MonitorTypes monitorType, TraceEvent item)
         {
-            var data = _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.ParseTraceEvent(item);
+            var data = _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.Parse(item);
 
             if (data == null)
             {
