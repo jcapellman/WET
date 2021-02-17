@@ -1,5 +1,8 @@
-﻿using Microsoft.Diagnostics.Tracing;
+﻿using System;
+
+using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Parsers;
+using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 
 using WET.lib.Enums;
 using WET.lib.MonitorItems;
@@ -9,13 +12,16 @@ namespace WET.lib.Monitors
 {
     public class UdpSendMonitor : BaseMonitor
     {
-        public override KernelTraceEventParser.Keywords KeyWordMap => KernelTraceEventParser.Keywords.NetworkTCPIP;
+        public override KernelTraceEventParser.Keywords KeyWordMap => 
+            KernelTraceEventParser.Keywords.NetworkTCPIP;
 
         public override MonitorTypes MonitorType => MonitorTypes.UdpSend;
 
-        public override object ParseTraceEvent(TraceEvent eventData)
+        public override Type ExpectedEventDataType => typeof(UdpIpTraceData);
+
+        protected override object ParseTraceEvent(TraceEvent eventData)
         {
-            var obj = (Microsoft.Diagnostics.Tracing.Parsers.Kernel.UdpIpTraceData)eventData;
+            var obj = eventData as UdpIpTraceData;
 
             return new UdpSendMonitorItem
             {
