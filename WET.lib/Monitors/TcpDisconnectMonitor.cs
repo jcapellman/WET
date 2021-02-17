@@ -14,7 +14,7 @@ namespace WET.lib.Monitors
     {
         public override KernelTraceEventParser.Keywords KeyWordMap => KernelTraceEventParser.Keywords.NetworkTCPIP;
 
-        public override MonitorTypes MonitorType => MonitorTypes.TcpConnect;
+        public override MonitorTypes MonitorType => MonitorTypes.TcpDisconnect;
 
         public override Type ExpectedEventDataType => typeof(TcpIpConnectTraceData);
 
