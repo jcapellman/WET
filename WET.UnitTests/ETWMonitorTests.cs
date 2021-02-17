@@ -1,0 +1,42 @@
+﻿using System.Threading;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using WET.lib;
+using WET.lib.Enums;
+
+namespace WET.UnitTests
+{
+    [TestClass]
+    public class ETWMonitorTests
+    {
+        [TestMethod]
+        public void ETWMonitor_Null()
+        {
+            var etw = new ETWMonitor();
+
+            etw.Start(null, MonitorTypes.All, OutputFormat.CSV);
+
+            etw.Stop();
+        }
+
+        [TestMethod]
+        public void ETWMonitor_AllMonitors()
+        {
+            using var etw = new ETWMonitor();
+
+            etw.OnEvent += Etw_OnEvent;
+
+            etw.Start("UnitTesto", MonitorTypes.All, OutputFormat.CSV);
+
+            Thread.Sleep(60000);
+
+            etw.Stop();
+        }
+
+        private void Etw_OnEvent(object sender, lib.Containers.ETWEventContainerItem e)
+        {
+            Assert.IsNotNull(e);
+        }
+    }
+}
