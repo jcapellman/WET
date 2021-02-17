@@ -33,7 +33,12 @@ namespace WET.UnitTests.MonitorTests
         public void FileReadMonitor_Validity()
         {
             Assert.IsTrue(_monitor.MonitorType == MonitorTypes.FileRead);
-            Assert.IsTrue(_monitor.KeyWordMap == KernelTraceEventParser.Keywords.DiskIO);
+
+            const KernelTraceEventParser.Keywords expected = KernelTraceEventParser.Keywords.DiskFileIO |
+                                                             KernelTraceEventParser.Keywords.FileIOInit |
+                                                             KernelTraceEventParser.Keywords.FileIO;
+
+            Assert.AreEqual(expected, _monitor.KeyWordMap);
         }
     }
 }
