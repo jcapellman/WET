@@ -13,7 +13,7 @@ namespace WET.UnitTests.MonitorTests
     [TestClass]
     public class ImageLoadMonitorTests : BaseMonitorTests
     {
-        private readonly ProcessStopMonitor _monitor = new();
+        private readonly ImageLoadMonitor _monitor = new();
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
