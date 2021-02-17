@@ -37,6 +37,14 @@ namespace WET.UnitTests
         private void Etw_OnEvent(object sender, lib.Containers.ETWEventContainerItem e)
         {
             Assert.IsNotNull(e);
+
+            Assert.IsNotNull(e.MonitorType);
+            Assert.IsNotNull(e.Timestamp);
+            Assert.IsNotNull(e.Format);
+            Assert.IsNotNull(e.ID);
+            Assert.IsNotNull(e.Payload);
+
+            Assert.AreEqual(OutputFormat.CSV, e.Format);
         }
     }
 }
