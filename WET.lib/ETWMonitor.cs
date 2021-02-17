@@ -49,6 +49,11 @@ namespace WET.lib
 
             _selectedOutputFormatter = _outputFormatters.FirstOrDefault(a => a.Formatter == outputFormat);
 
+            if (string.IsNullOrEmpty(sessionName))
+            {
+                throw new ArgumentNullException(nameof(sessionName));
+            }
+
             _session = new TraceEventSession(sessionName);
 
             var enabledMonitors = monitorTypes == MonitorTypes.All ? 
@@ -191,9 +196,9 @@ namespace WET.lib
 
         public void Stop()
         {
-            _ctSource.Cancel();
+            _ctSource?.Cancel();
 
-            _session.Stop(true);
+            _session?.Stop(true);
         }
         
         public void Dispose()
