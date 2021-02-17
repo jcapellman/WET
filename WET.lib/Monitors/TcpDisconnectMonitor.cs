@@ -1,5 +1,8 @@
-﻿using Microsoft.Diagnostics.Tracing;
+﻿using System;
+
+using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Parsers;
+using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 
 using WET.lib.Enums;
 using WET.lib.MonitorItems;
@@ -13,9 +16,11 @@ namespace WET.lib.Monitors
 
         public override MonitorTypes MonitorType => MonitorTypes.TcpConnect;
 
-        public override object ParseTraceEvent(TraceEvent eventData)
+        public override Type ExpectedEventDataType => typeof(TcpIpConnectTraceData);
+
+        protected override object ParseTraceEvent(TraceEvent eventData)
         {
-            var obj = (Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpConnectTraceData)eventData;
+            var obj = eventData as TcpIpConnectTraceData;
             
             return new TcpDisconnectMonitorItem
             {
