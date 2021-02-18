@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Linq;
+using System.Threading;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,7 +17,14 @@ namespace WET.UnitTests
         {
             var etw = new ETWMonitor();
 
-            etw.Start(null, MonitorTypes.All, OutputFormat.CSV);
+            try
+            {
+                etw.Start(null, MonitorTypes.All, OutputFormat.CSV);
+            }
+            catch (AggregateException aex)
+            {
+                Assert.IsTrue(aex.InnerExceptions.Any(a => a.GetType() == typeof(ArgumentNullException)));
+            }
 
             etw.Stop();
         }
