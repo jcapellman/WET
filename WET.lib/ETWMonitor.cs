@@ -121,7 +121,7 @@ namespace WET.lib
             Task.Run(() =>
             {
                 InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter);
-            }, _ctSource.Token);
+            }, _ctSource.Token).Wait();
         }
 
         private void ParseEvent(MonitorTypes monitorType, TraceEvent item)
