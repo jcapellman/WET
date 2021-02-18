@@ -24,7 +24,7 @@ namespace WET.lib.Monitors.Base
 
             if (eventData.GetType() != ExpectedEventDataType)
             {
-                throw new ArgumentException($"Argument was not of type {ExpectedEventDataType}", nameof(eventData));
+                throw new ArgumentException($"Argument was not of type {ExpectedEventDataType} (Got {eventData.GetType()} instead)", nameof(eventData));
             }
 
             return ParseTraceEvent(eventData);
