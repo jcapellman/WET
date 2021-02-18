@@ -16,11 +16,11 @@ namespace WET.lib.Monitors
 
         public override MonitorTypes MonitorType => MonitorTypes.TcpDisconnect;
 
-        public override Type ExpectedEventDataType => typeof(TcpIpConnectTraceData);
+        public override Type ExpectedEventDataType => typeof(TcpIpTraceData);
 
         protected override object ParseTraceEvent(TraceEvent eventData)
         {
-            var obj = eventData as TcpIpConnectTraceData;
+            var obj = eventData as TcpIpTraceData;
             
             return new TcpDisconnectMonitorItem
             {
