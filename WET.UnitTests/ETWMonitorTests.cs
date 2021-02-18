@@ -16,16 +16,9 @@ namespace WET.UnitTests
         public void ETWMonitor_Null()
         {
             var etw = new ETWMonitor();
-
-            try
-            {
-                etw.Start(null, MonitorTypes.All, OutputFormat.CSV);
-            }
-            catch (AggregateException aex)
-            {
-                Assert.IsTrue(aex.InnerExceptions.Any(a => a.GetType() == typeof(ArgumentNullException)));
-            }
-
+            
+            etw.Start(null, MonitorTypes.All, OutputFormat.CSV);
+            
             etw.Stop();
         }
 

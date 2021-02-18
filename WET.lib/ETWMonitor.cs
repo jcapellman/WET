@@ -121,7 +121,7 @@ namespace WET.lib
             Task.Run(() =>
             {
                 InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter);
-            }, _ctSource.Token).Wait();
+            }, _ctSource.Token);
         }
 
         private void ParseEvent(MonitorTypes monitorType, TraceEvent item)
@@ -144,6 +144,7 @@ namespace WET.lib
             {
                 ID = Guid.NewGuid(),
                 MonitorType = monitorType,
+                Format = _selectedOutputFormatter.Formatter,
                 Payload = _selectedOutputFormatter.ConvertData(data),
                 Timestamp = DateTimeOffset.Now
             });
