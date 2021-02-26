@@ -7,5 +7,7 @@ namespace WET.lib.Interfaces
     public interface IEventStorage
     {
         public Task<bool> WriteEventAsync(ETWEventContainerItem item);
+
+        public void Shutdown();
     }
 }

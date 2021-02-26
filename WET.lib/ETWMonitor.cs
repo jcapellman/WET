@@ -218,6 +218,8 @@ namespace WET.lib
             _ctSource?.Cancel();
 
             _session?.Stop(true);
+
+            _eventStorage?.Shutdown();
         }
         
         public void Dispose()
@@ -225,6 +227,8 @@ namespace WET.lib
             _ctSource.Cancel();
 
             _session.Stop(true);
+
+            _eventStorage?.Shutdown();
 
             GC.SuppressFinalize(this);
         }
