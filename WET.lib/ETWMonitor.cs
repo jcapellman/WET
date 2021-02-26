@@ -34,6 +34,8 @@ namespace WET.lib
 
         private IEventFilter _eventFilter;
 
+        private IEventStorage _eventStorage;
+
         public ETWMonitor()
         {
             _monitors = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
@@ -43,9 +45,11 @@ namespace WET.lib
                 .Select(a => (BaseOutputFormatter) Activator.CreateInstance(a)).ToList();
         }
 
-        private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat, IEventFilter eventFilter)
+        private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat, IEventFilter eventFilter, IEventStorage eventStorage)
         {
             _eventFilter = eventFilter;
+
+            _eventStorage = eventStorage;
 
             _selectedOutputFormatter = _outputFormatters.FirstOrDefault(a => a.Formatter == outputFormat);
 
@@ -116,15 +120,15 @@ namespace WET.lib
             _session.Source.Process();
         }
 
-        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null)
+        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null, IEventStorage eventStorage = null)
         {
             Task.Run(() =>
             {
-                InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter);
+                InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter, eventStorage);
             }, _ctSource.Token);
         }
 
-        private void ParseEvent(MonitorTypes monitorType, TraceEvent item)
+        private async void ParseEvent(MonitorTypes monitorType, TraceEvent item)
         {
             var data = _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.Parse(item);
 
@@ -140,14 +144,28 @@ namespace WET.lib
                 return;
             }
 
-            OnEvent?.Invoke(this, new ETWEventContainerItem
+            var containerItem = new ETWEventContainerItem
             {
                 ID = Guid.NewGuid(),
                 MonitorType = monitorType,
                 Format = _selectedOutputFormatter.Formatter,
                 Payload = _selectedOutputFormatter.ConvertData(data),
                 Timestamp = DateTimeOffset.Now
-            });
+            };
+
+            if (_eventStorage != null)
+            {
+                var result = await _eventStorage.WriteEventAsync(containerItem);
+
+                if (!result)
+                {
+                    // TODO: Handle Error
+                }
+
+                return;
+            }
+
+            OnEvent?.Invoke(this, containerItem);
         }
 
         private void Kernel_UdpIpRecv(Microsoft.Diagnostics.Tracing.Parsers.Kernel.UdpIpTraceData obj) =>
