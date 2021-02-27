@@ -8,6 +8,8 @@ namespace WET.lib.Containers
     {
         public Guid ID { get; internal set; }
 
+        public string Hostname { get; internal set; }
+
         public DateTimeOffset Timestamp { get; internal set; }
 
         public MonitorTypes MonitorType { get; internal set; }

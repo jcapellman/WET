@@ -150,7 +150,8 @@ namespace WET.lib
                 MonitorType = monitorType,
                 Format = _selectedOutputFormatter.Formatter,
                 Payload = _selectedOutputFormatter.ConvertData(data),
-                Timestamp = DateTimeOffset.Now
+                Timestamp = DateTimeOffset.Now,
+                Hostname = Environment.MachineName
             };
 
             if (_eventStorage != null)
