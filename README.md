@@ -20,17 +20,19 @@ The library currently hooks into the following events:
 * .NET 5
 * Windows 7 SP1+
 
+Host process due to the nature of the hooks requires an admministrator (checks as of 0.5.4 will throw an Unauthorized Exception).
+
 ## Installation
 Either clone this repository or use the pre-built version that has been uploaded to NuGet.org. Below are two methods of adding the package to your existing project:
 
 ### Package Manager
 ```
-Install-Package WET.lib -Version 0.4.0
+Install-Package WET.lib -Version 0.5.4
 ```
 
 ### .NET CLI
 ```
-dotnet add package WET.lib --version 0.4.0
+dotnet add package WET.lib --version 0.5.4
 ```
 
 ## Roadmap
@@ -38,7 +40,16 @@ Hooks for the following are planned:
 * File Create/Delete/Read/Update
 
 ## Usage
-The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.4.0 - it defaults to ).
+The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.5.4 - it defaults to all).
+
+## Extensibility
+### Storage
+Knowing not everyone will want to just hook into the event and handle it in their C# app, an IEventStorage Interface is defined and allowed as a parameter. This allows you to store all of the tracing data into a SQL database, cloud storage or offloaded to disk.
+
+For my own curiosity and fun I implemented a few of Microsoft Azure's storage mechanisms in the WET.Azure Library (https://github.com/jcapellman/WET.Azure).
+
+### Event Filtering
+Also knowing you may have internal logic rules to further filter out events, an IEventFilter interface is defined to handle events internally before being fired.
 
 ## Example
 ### Hooking
