@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,6 +37,17 @@ namespace WET.lib
 
         private IEventStorage _eventStorage;
 
+        private static bool IsRunningAsAdmin()
+        {
+#pragma warning disable CA1416 // Validate platform compatibility
+            var wm = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+#pragma warning restore CA1416 // Validate platform compatibility
+
+#pragma warning disable CA1416 // Validate platform compatibility
+            return wm.IsInRole(WindowsBuiltInRole.Administrator);
+#pragma warning restore CA1416 // Validate platform compatibility
+        }
+
         public ETWMonitor()
         {
             _monitors = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
@@ -43,6 +55,11 @@ namespace WET.lib
 
             _outputFormatters = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseOutputFormatter))
                 .Select(a => (BaseOutputFormatter) Activator.CreateInstance(a)).ToList();
+
+            if (!IsRunningAsAdmin())
+            {
+                throw new UnauthorizedAccessException("Host process is not running as administrator");
+            }
         }
 
         private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat, IEventFilter eventFilter, IEventStorage eventStorage)
