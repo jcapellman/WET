@@ -146,12 +146,12 @@ namespace WET.lib
 
             var containerItem = new ETWEventContainerItem
             {
-                ID = Guid.NewGuid(),
+                id = Guid.NewGuid(),
                 MonitorType = monitorType,
                 Format = _selectedOutputFormatter.Formatter,
                 Payload = _selectedOutputFormatter.ConvertData(data),
                 Timestamp = DateTimeOffset.Now,
-                Hostname = Environment.MachineName
+                hostname = Environment.MachineName
             };
 
             if (_eventStorage != null)
