@@ -40,6 +40,7 @@ Hooks for the following are planned:
 * macOS implementation
 * Linux implementation
 * More Storage Implementations
+* Warning and Error Events
 
 ## Usage
 The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.5.4 - it defaults to all).
