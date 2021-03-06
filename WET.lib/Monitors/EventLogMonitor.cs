@@ -27,11 +27,21 @@ namespace WET.lib.Monitors
 
         protected override object ParseTraceEvent(object eventData)
         {
-            var obj = eventData as EventLogEntry;
-            
+            if (eventData is not EventLogEntry obj)
+            {
+                return null;
+            }
+
             return new EventLogMonitorItem()
             {
-                
+#pragma warning disable CA1416 // Validate platform compatibility
+                TimeWritten = obj.TimeWritten,
+                EntryType = obj.EntryType.ToString(),
+                UserName = obj.UserName,
+                InstanceId = obj.InstanceId,
+                Message = obj.Message,
+                Source = obj.Source
+#pragma warning restore CA1416 // Validate platform compatibility
             };
         }
     }
