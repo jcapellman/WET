@@ -23,7 +23,6 @@ namespace WET.lib.Enums
         UdpSend = 32768,
         UdpReceive = 65536,
         RegistryOpen = 131072,
-        EventLogWarning = 262144,
-        EventLogError = 524288
+        EventLogs = 262144
     }
 }
