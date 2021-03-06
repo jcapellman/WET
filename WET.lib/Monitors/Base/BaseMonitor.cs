@@ -15,7 +15,24 @@ namespace WET.lib.Monitors.Base
 
         public abstract Type ExpectedEventDataType { get; }
 
-        public object Parse(TraceEvent eventData)
+        public bool KernelEventTracing = true;
+
+        public object ParseKernel(TraceEvent eventData)
+        {
+            if (eventData == null)
+            {
+                throw new ArgumentNullException(nameof(eventData));
+            }
+
+            if (eventData.GetType() != ExpectedEventDataType)
+            {
+                throw new ArgumentException($"Argument was not of type {ExpectedEventDataType} (Got {eventData.GetType()} instead)", nameof(eventData));
+            }
+
+            return ParseKernelTraceEvent(eventData);
+        }
+
+        public object Parse(object eventData)
         {
             if (eventData == null)
             {
@@ -30,6 +47,8 @@ namespace WET.lib.Monitors.Base
             return ParseTraceEvent(eventData);
         }
 
-        protected abstract object ParseTraceEvent(TraceEvent eventData);
+        protected abstract object ParseKernelTraceEvent(TraceEvent eventData);
+        
+        protected abstract object ParseTraceEvent(object eventData);
     }
 }
