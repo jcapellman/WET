@@ -43,7 +43,7 @@ namespace WET.UnitTests
             Assert.IsNotNull(e.MonitorType);
             Assert.IsNotNull(e.Timestamp);
             Assert.IsNotNull(e.Format);
-            Assert.IsNotNull(e.ID);
+            Assert.IsNotNull(e.id);
             Assert.IsNotNull(e.Payload);
 
             Assert.AreEqual(OutputFormat.CSV, e.Format);
