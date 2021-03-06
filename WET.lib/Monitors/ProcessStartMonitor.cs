@@ -18,7 +18,7 @@ namespace WET.lib.Monitors
 
         public override Type ExpectedEventDataType => typeof(ProcessTraceData);
 
-        protected override object ParseTraceEvent(TraceEvent eventData)
+        protected override object ParseKernelTraceEvent(TraceEvent eventData)
         {
             var obj = eventData as ProcessTraceData;
 
@@ -29,5 +29,7 @@ namespace WET.lib.Monitors
                 CommandLineArguments = obj.CommandLine
             };
         }
+        
+        protected override object ParseTraceEvent(object eventData) => throw new NotImplementedException();
     }
 }
