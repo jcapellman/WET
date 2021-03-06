@@ -19,14 +19,14 @@ namespace WET.UnitTests.MonitorTests
         [ExpectedException(typeof(ArgumentNullException))]
         public void FileReadMonitor_NullTest()
         {
-            _monitor.Parse(null);
+            _monitor.ParseKernel(null);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void FileReadMonitor_InvalidArgument()
         {
-            _monitor.Parse(new TestEventData());
+            _monitor.ParseKernel(new TestEventData());
         }
 
         [TestMethod]
