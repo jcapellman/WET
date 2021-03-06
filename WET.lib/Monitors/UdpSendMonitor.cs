@@ -19,7 +19,7 @@ namespace WET.lib.Monitors
 
         public override Type ExpectedEventDataType => typeof(UdpIpTraceData);
 
-        protected override object ParseTraceEvent(TraceEvent eventData)
+        protected override object ParseKernelTraceEvent(TraceEvent eventData)
         {
             var obj = eventData as UdpIpTraceData;
 
@@ -32,5 +32,7 @@ namespace WET.lib.Monitors
                 Size = obj.size
             };
         }
+
+        protected override object ParseTraceEvent(object eventData) => throw new NotImplementedException();
     }
 }
