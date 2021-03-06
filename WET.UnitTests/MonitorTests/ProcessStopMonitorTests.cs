@@ -19,14 +19,14 @@ namespace WET.UnitTests.MonitorTests
         [ExpectedException(typeof(ArgumentNullException))]
         public void ProcessStopMonitor_NullTest()
         {
-            _monitor.Parse(null);
+            _monitor.ParseKernel(null);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void ProcessStopMonitor_InvalidArgument()
         {
-            _monitor.Parse(new TestEventData());
+            _monitor.ParseKernel(new TestEventData());
         }
 
         [TestMethod]
