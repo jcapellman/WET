@@ -19,7 +19,7 @@ namespace WET.lib.Monitors
 
         public override Type ExpectedEventDataType => typeof(TcpIpSendTraceData);
 
-        protected override object ParseTraceEvent(TraceEvent eventData)
+        protected override object ParseKernelTraceEvent(TraceEvent eventData)
         {
             var obj = eventData as TcpIpSendTraceData;
 
@@ -31,5 +31,7 @@ namespace WET.lib.Monitors
                 ProcessID = obj.ProcessID
             };
         }
+
+        protected override object ParseTraceEvent(object eventData) => throw new NotImplementedException();
     }
 }
