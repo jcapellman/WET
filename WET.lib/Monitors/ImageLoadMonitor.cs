@@ -18,7 +18,7 @@ namespace WET.lib.Monitors
 
         public override Type ExpectedEventDataType => typeof(ImageLoadTraceData);
 
-        protected override object ParseTraceEvent(TraceEvent eventData)
+        protected override object ParseKernelTraceEvent(TraceEvent eventData)
         {
             var obj = eventData as ImageLoadTraceData;
 
@@ -29,5 +29,7 @@ namespace WET.lib.Monitors
                 ThreadID = obj.ThreadID
             };
         }
+
+        protected override object ParseTraceEvent(object eventData) => throw new NotImplementedException();
     }
 }
