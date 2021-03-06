@@ -132,8 +132,7 @@ namespace WET.lib
                     case MonitorTypes.UdpReceive:
                         _session.Source.Kernel.UdpIpRecv += Kernel_UdpIpRecv;
                         break;
-                    case MonitorTypes.EventLogError:
-                    case MonitorTypes.EventLogWarning:
+                    case MonitorTypes.EventLogs:
 #pragma warning disable CA1416 // Validate platform compatibility
                         var eventLog = new EventLog("Application", ".");
 
@@ -215,7 +214,7 @@ namespace WET.lib
 
 #pragma warning disable CA1416 // Validate platform compatibility
         private void EventLog_EntryWritten(object sender, EntryWrittenEventArgs obj) =>
-            ParseEvent(MonitorTypes.EventLogError, obj.Entry);
+            ParseEvent(MonitorTypes.EventLogs, obj.Entry);
 #pragma warning restore CA1416 // Validate platform compatibility
 
         private void Kernel_UdpIpRecv(Microsoft.Diagnostics.Tracing.Parsers.Kernel.UdpIpTraceData obj) =>

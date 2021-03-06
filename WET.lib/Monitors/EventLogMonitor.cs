@@ -14,7 +14,7 @@ namespace WET.lib.Monitors
     {
         public override KernelTraceEventParser.Keywords KeyWordMap => KernelTraceEventParser.Keywords.None;
 
-        public override MonitorTypes MonitorType => MonitorTypes.EventLogError;
+        public override MonitorTypes MonitorType => MonitorTypes.EventLogs;
 
         public override Type ExpectedEventDataType => typeof(EventLogEntry);
 
