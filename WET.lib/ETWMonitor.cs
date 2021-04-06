@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -38,6 +39,14 @@ namespace WET.lib
 
         private IEventStorage _eventStorage;
 
+        private DateTime _lastPush = DateTime.Now;
+
+        private TimeSpan? _interval;
+
+        private int? _threshold;
+
+        private ConcurrentBag<ETWEventContainerItem> _throttledItems = new();
+
         private static bool IsRunningAsAdmin()
         {
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -63,8 +72,13 @@ namespace WET.lib
             }
         }
 
-        private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat, IEventFilter eventFilter, IEventStorage eventStorage)
+        private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat, 
+            IEventFilter eventFilter, IEventStorage eventStorage, TimeSpan? interval = null, int? threshold = null)
         {
+            _interval = interval;
+
+            _threshold = threshold;
+
             _eventFilter = eventFilter;
 
             _eventStorage = eventStorage;
@@ -146,11 +160,13 @@ namespace WET.lib
             _session.Source.Process();
         }
 
-        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null, IEventStorage eventStorage = null)
+        public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, 
+            OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null, IEventStorage eventStorage = null,
+            TimeSpan? interval = null, int? threshold = null)
         {
             Task.Run(() =>
             {
-                InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter, eventStorage);
+                InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter, eventStorage, interval, threshold);
             }, _ctSource.Token);
         }
 
@@ -184,6 +200,32 @@ namespace WET.lib
                 Timestamp = DateTimeOffset.Now,
                 hostname = Environment.MachineName
             };
+
+            // If either is set assume batching
+            if (_interval.HasValue || _threshold.HasValue)
+            {
+                if ((_interval.HasValue && DateTime.Now.Subtract(_lastPush) > _interval.Value) ||
+                    (_threshold.HasValue && _throttledItems.Count > _threshold.Value))
+                {
+                    var result = await _eventStorage.WriteBatchEventAsync(_throttledItems.ToList());
+
+                    if (!result)
+                    {
+                        // TODO: Handle Errors
+
+                        return;
+                    }
+
+                    _throttledItems.Clear();
+                    _lastPush = DateTime.Now;
+
+                    return;
+                }
+                
+                _throttledItems.Add(containerItem);
+                
+                return;
+            }
 
             if (_eventStorage != null)
             {
