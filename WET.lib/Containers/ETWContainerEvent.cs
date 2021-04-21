@@ -18,6 +18,8 @@ namespace WET.lib.Containers
 
         public string Payload { get; internal set; }
 
+        public long hostid { get; internal set; }
+
         public override string ToString() => System.Text.Json.JsonSerializer.Serialize(this);
     }
 }

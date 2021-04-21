@@ -45,6 +45,8 @@ namespace WET.lib
 
         private int? _threshold;
 
+        private long? _hostID;
+
         private ConcurrentBag<ETWEventContainerItem> _throttledItems = new();
 
         private static bool IsRunningAsAdmin()
@@ -73,8 +75,10 @@ namespace WET.lib
         }
 
         private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat, 
-            IEventFilter eventFilter, IEventStorage eventStorage, TimeSpan? interval = null, int? threshold = null)
+            IEventFilter eventFilter, IEventStorage eventStorage, TimeSpan? interval = null, int? threshold = null, long? hostId = null)
         {
+            _hostID = hostId;
+
             _interval = interval;
 
             _threshold = threshold;
@@ -162,11 +166,11 @@ namespace WET.lib
 
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, 
             OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null, IEventStorage eventStorage = null,
-            TimeSpan? interval = null, int? threshold = null)
+            TimeSpan? interval = null, int? threshold = null, long? hostId = null)
         {
             Task.Run(() =>
             {
-                InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter, eventStorage, interval, threshold);
+                InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter, eventStorage, interval, threshold, hostId);
             }, _ctSource.Token);
         }
 
@@ -194,6 +198,7 @@ namespace WET.lib
             var containerItem = new ETWEventContainerItem
             {
                 id = Guid.NewGuid(),
+                hostid = _hostID ?? 0,
                 MonitorType = monitorType,
                 Format = _selectedOutputFormatter.Formatter,
                 Payload = _selectedOutputFormatter.ConvertData(data),
