@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Session;
+using Microsoft.Extensions.Logging;
 
 using WET.lib.Containers;
 using WET.lib.Enums;
@@ -36,6 +37,8 @@ namespace WET.lib
         private BaseOutputFormatter _selectedOutputFormatter;
 
         private IEventFilter _eventFilter;
+
+        private ILogger _logger;
 
         private IEventStorage _eventStorage;
 
@@ -75,8 +78,10 @@ namespace WET.lib
         }
 
         private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat, 
-            IEventFilter eventFilter, IEventStorage eventStorage, TimeSpan? interval = null, int? threshold = null, long? hostId = null)
+            IEventFilter eventFilter, IEventStorage eventStorage, TimeSpan? interval = null, int? threshold = null, long? hostId = null, ILogger logger = null)
         {
+            _logger = logger;
+
             _hostID = hostId;
 
             _interval = interval;
@@ -166,11 +171,11 @@ namespace WET.lib
 
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, 
             OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null, IEventStorage eventStorage = null,
-            TimeSpan? interval = null, int? threshold = null, long? hostId = null)
+            TimeSpan? interval = null, int? threshold = null, long? hostId = null, ILogger logger = null)
         {
             Task.Run(() =>
             {
-                InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter, eventStorage, interval, threshold, hostId);
+                InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter, eventStorage, interval, threshold, hostId, logger);
             }, _ctSource.Token);
         }
 
