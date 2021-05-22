@@ -101,6 +101,8 @@ namespace WET.lib
 
             _session = new TraceEventSession(sessionName);
 
+            LogDebug($"Starting ETW Session ({sessionName})");
+
             var enabledMonitors = monitorTypes == MonitorTypes.All ? 
                 _monitors : _monitors.Where(a => monitorTypes.HasFlag(a.MonitorType)).ToList();
 
@@ -179,6 +181,21 @@ namespace WET.lib
             }, _ctSource.Token);
         }
 
+        private void LogDebug(string message)
+        {
+            LogMessage(LogLevel.Debug, message);
+        }
+
+        private void LogError(string message)
+        {
+            LogMessage(LogLevel.Error, message);
+        }
+
+        private void LogMessage(LogLevel level, string message)
+        {
+            _logger.Log(level, message);
+        }
+
         private void ParseKernelEvent(MonitorTypes monitorType, TraceEvent item)
         {
             var data = _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.ParseKernel(item);
@@ -243,7 +260,7 @@ namespace WET.lib
 
                 if (!result)
                 {
-                    // TODO: Handle Error
+                    LogError($"Could not write {containerItem} to Storage");
                 }
 
                 return;
