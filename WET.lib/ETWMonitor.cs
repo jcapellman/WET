@@ -238,7 +238,7 @@ namespace WET.lib
 
                     if (!result)
                     {
-                        // TODO: Handle Errors
+                        LogError($"Could not write batch of throttled items");
 
                         return;
                     }
