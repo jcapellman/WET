@@ -198,13 +198,22 @@ namespace WET.lib
 
         private void ParseKernelEvent(MonitorTypes monitorType, TraceEvent item)
         {
-            var data = _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.ParseKernel(item);
+            var monitor = _monitors.FirstOrDefault(a => a.MonitorType == monitorType);
 
-            if (data == null)
+            if (monitor == null)
             {
                 throw new Exception($"{monitorType} could not be mapped");
             }
-            
+
+            var data = monitor.ParseKernel(item);
+
+            if (data == null)
+            {
+                LogDebug($"{monitorType} event data null was null - ignoring");
+
+                return;
+            }
+
             Parse(monitorType, data);
         }
 
