@@ -193,7 +193,7 @@ namespace WET.lib
 
         private void LogMessage(LogLevel level, string message)
         {
-            _logger.Log(level, message);
+            _logger?.Log(level, message);
         }
 
         private void ParseKernelEvent(MonitorTypes monitorType, TraceEvent item)
