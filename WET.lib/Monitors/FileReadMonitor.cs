@@ -13,6 +13,7 @@ namespace WET.lib.Monitors
     public class FileReadMonitor : BaseMonitor
     {
         public override KernelTraceEventParser.Keywords KeyWordMap => KernelTraceEventParser.Keywords.DiskFileIO |
+                                                                      KernelTraceEventParser.Keywords.DiskIO |
                                                                       KernelTraceEventParser.Keywords.FileIOInit |
                                                                       KernelTraceEventParser.Keywords.FileIO;
 
@@ -23,6 +24,11 @@ namespace WET.lib.Monitors
         protected override object ParseKernelTraceEvent(TraceEvent eventData)
         {
             var obj = eventData as DiskIOTraceData;
+
+            if (string.IsNullOrEmpty(obj.FileName))
+            {
+                return null;
+            }
 
             return new FileReadMonitorItem
             {
