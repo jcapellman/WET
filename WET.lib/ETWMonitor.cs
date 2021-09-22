@@ -115,6 +115,9 @@ namespace WET.lib
                     case MonitorTypes.FileRead:
                         _session.Source.Kernel.DiskIORead += Kernel_DiskIORead;
                         break;
+                    case MonitorTypes.FileWrite:
+                        _session.Source.Kernel.DiskIOWrite += Kernel_DiskIOWrite;
+                        break;
                     case MonitorTypes.ImageLoad:
                         _session.Source.Kernel.ImageLoad += Kernel_ImageLoad;
                         break;
@@ -300,6 +303,9 @@ namespace WET.lib
 
         private void Kernel_UdpIpSend(Microsoft.Diagnostics.Tracing.Parsers.Kernel.UdpIpTraceData obj) =>
             ParseKernelEvent(MonitorTypes.UdpSend, obj);
+
+        private void Kernel_DiskIOWrite(Microsoft.Diagnostics.Tracing.Parsers.Kernel.DiskIOTraceData obj) => 
+            ParseKernelEvent(MonitorTypes.FileWrite, obj);
 
         private void Kernel_TcpIpConnect(Microsoft.Diagnostics.Tracing.Parsers.Kernel.TcpIpConnectTraceData obj) =>
             ParseKernelEvent(MonitorTypes.TcpConnect, obj);
