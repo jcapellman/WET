@@ -26,7 +26,9 @@ namespace WET.lib.Monitors
             {
                 FileName = obj.ImageFileName,
                 ParentProcessID = obj.ParentID,
-                CommandLineArguments = obj.CommandLine
+                CommandLineArguments = obj.CommandLine,
+                ProcessID = obj.ProcessID,
+                ProcessName = obj.ProcessName
             };
         }
         

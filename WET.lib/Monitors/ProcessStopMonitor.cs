@@ -25,7 +25,8 @@ namespace WET.lib.Monitors
             return new ProcessStopMonitorItem
             {
                 FileName = obj.ImageFileName,
-                ProcessID = obj.ProcessID
+                ProcessID = obj.ProcessID,
+                ProcessName = obj.ProcessName
             };
         }
 

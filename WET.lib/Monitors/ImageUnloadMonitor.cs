@@ -26,7 +26,8 @@ namespace WET.lib.Monitors
             {
                 FileName = obj.FileName,
                 ProcessID = obj.ProcessID,
-                ThreadID = obj.ThreadID
+                ThreadID = obj.ThreadID,
+                ProcessName = obj.ProcessName
             };
         }
         
