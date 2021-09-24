@@ -33,7 +33,8 @@ namespace WET.lib.Monitors
             return new FileWriteMonitorItem
             {
                 FileName = obj.FileName,
-                ProcessID = obj.ProcessID
+                ProcessID = obj.ProcessID,
+                ProcessName = obj.ProcessName
             };
         }
 

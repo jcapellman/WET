@@ -28,7 +28,8 @@ namespace WET.lib.Monitors
                 DestinationIP = obj.daddr.ToString(),
                 DestinationPort = obj.dport,
                 Size = obj.size,
-                ProcessID = obj.ProcessID
+                ProcessID = obj.ProcessID,
+                ProcessName = obj.ProcessName
             };
         }
 

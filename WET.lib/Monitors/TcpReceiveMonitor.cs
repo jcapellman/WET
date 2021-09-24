@@ -28,7 +28,8 @@ namespace WET.lib.Monitors
                 SenderIP = obj.saddr.ToString(),
                 SenderPort = obj.sport,
                 Size = obj.size,
-                ProcessID = obj.ProcessID
+                ProcessID = obj.ProcessID,
+                ProcessName = obj.ProcessName
             };
         }
 
