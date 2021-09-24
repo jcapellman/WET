@@ -5,6 +5,9 @@ The library currently hooks into the following events:
 * DLL Load
 * DLL Unload
 * Event Log (Application)
+* File Create
+* File Delete
+* File Read
 * Process Start
 * Process Stop
 * Registry Key Create
@@ -21,19 +24,19 @@ The library currently hooks into the following events:
 * .NET 5
 * Windows 7 SP1+
 
-Host process due to the nature of the hooks requires an admministrator (checks as of 0.5.4 will throw an Unauthorized Exception).
+Host process due to the nature of the hooks requires an admministrator (checks as of 0.7.1 will throw an Unauthorized Exception).
 
 ## Installation
 Either clone this repository or use the pre-built version that has been uploaded to NuGet.org. Below are two methods of adding the package to your existing project:
 
 ### Package Manager
 ```
-Install-Package WET.lib -Version 0.5.4
+Install-Package WET.lib -Version 0.7.1
 ```
 
 ### .NET CLI
 ```
-dotnet add package WET.lib --version 0.5.4
+dotnet add package WET.lib --version 0.7.1
 ```
 
 ## Roadmap
@@ -43,7 +46,7 @@ Hooks for the following are planned:
 * More Storage Implementations
 
 ## Usage
-The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.5.4 - it defaults to all).
+The library is designed for flexibility so you are not required to use all of the hooks the library provides. You can however use all of the hooks (and by default at least as of 0.7.1 - it defaults to all).
 
 ## Extensibility
 ### Storage
