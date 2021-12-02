@@ -50,6 +50,8 @@ namespace WET.lib
 
         private long? _hostID;
 
+        private int? _traceProcessId;
+
         private ConcurrentBag<ETWEventContainerItem> _throttledItems = new();
 
         private static bool IsRunningAsAdmin()
@@ -185,6 +187,23 @@ namespace WET.lib
             {
                 InitializeMonitor(sessionName, monitorTypes, outputFormat, eventFilter, eventStorage, interval, threshold, hostId, logger);
             }, _ctSource.Token);
+        }
+
+        public void StartProcessTrace(string processPath, string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All,
+            OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null, IEventStorage eventStorage = null,
+            TimeSpan? interval = null, int? threshold = null, long? hostId = null, ILogger logger = null)
+        {
+            using Process process = new();
+
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.FileName = processPath;
+            process.StartInfo.CreateNoWindow = false;
+
+            process.Start();
+
+            _traceProcessId = process.Id;
+
+            Start(sessionName, monitorTypes, outputFormat, eventFilter, eventStorage, interval, threshold, hostId, logger);
         }
 
         private void LogDebug(string message)
