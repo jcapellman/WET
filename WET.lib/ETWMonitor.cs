@@ -15,6 +15,7 @@ using WET.lib.Containers;
 using WET.lib.Enums;
 using WET.lib.Extensions;
 using WET.lib.Interfaces;
+using WET.lib.MonitorItems.Base;
 using WET.lib.Monitors.Base;
 using WET.lib.OutputFormatters.Base;
 
@@ -248,6 +249,11 @@ namespace WET.lib
             {
                 // Filtered out based on the implementation - do not fire the event
 
+                return;
+            }
+
+            if (_traceProcessId.HasValue && ((BaseMonitorItem)data).ProcessID != _traceProcessId.Value)
+            {
                 return;
             }
 
