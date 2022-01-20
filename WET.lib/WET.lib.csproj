@@ -26,6 +26,11 @@
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
   </ItemGroup>
 
+    <ItemGroup>
+        <None Include="bin\x64\Release\net6.0\WET.lib.dll" Pack="true" PackagePath="build\net6.0\x64\WET.lib.dll" />
+        <None Include="bin\x86\Release\net6.0\WET.lib.dll" Pack="true" PackagePath="build\net6.0\x86\WET.lib.dll" />
+    </ItemGroup>
+	
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
