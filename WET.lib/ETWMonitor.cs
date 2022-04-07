@@ -457,9 +457,8 @@ namespace WET.lib
                             break;
                     }
                 }
-
-                _session.Stop(true);
             }
+            _session?.Stop(true);
             _eventStorage?.Shutdown();     
         }
         
