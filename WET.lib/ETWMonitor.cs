@@ -37,6 +37,8 @@ namespace WET.lib
 
         private BaseOutputFormatter _selectedOutputFormatter;
 
+        private EventLog _eventLog;
+
         private IEventFilter _eventFilter;
 
         private ILogger _logger;
@@ -168,10 +170,13 @@ namespace WET.lib
                         break;
                     case MonitorTypes.EventLogs:
 #pragma warning disable CA1416 // Validate platform compatibility
-                        var eventLog = new EventLog("Application", ".");
+                        if (_eventLog is null)
+                        {
+                            _eventLog = new EventLog("Application", ".");
+                        }
 
-                        eventLog.EntryWritten += EventLog_EntryWritten;
-                        eventLog.EnableRaisingEvents = true;
+                        _eventLog.EntryWritten += EventLog_EntryWritten;
+                        _eventLog.EnableRaisingEvents = true;
 #pragma warning restore CA1416 // Validate platform compatibility
                         break;
                 }
@@ -381,16 +386,87 @@ namespace WET.lib
         {
             _ctSource?.Cancel();
 
-            _session?.Stop(true);
+            if (_session != null && _session.Source != null)
+            {
+                _session.Source.StopProcessing();
 
-            _eventStorage?.Shutdown();
+                // Unsubscribe from the events
+                foreach (var monitor in _monitors)
+                {
+                    switch (monitor.MonitorType)
+                    {
+                        case MonitorTypes.FileRead:
+                            _session.Source.Kernel.DiskIORead -= Kernel_DiskIORead;
+                            break;
+                        case MonitorTypes.FileWrite:
+                            _session.Source.Kernel.DiskIOWrite -= Kernel_DiskIOWrite;
+                            break;
+                        case MonitorTypes.FileDelete:
+                            _session.Source.Kernel.FileIOFileDelete -= Kernel_FileIOFileDelete;
+                            break;
+                        case MonitorTypes.ImageLoad:
+                            _session.Source.Kernel.ImageLoad -= Kernel_ImageLoad;
+                            break;
+                        case MonitorTypes.ImageUnload:
+                            _session.Source.Kernel.ImageUnload -= Kernel_ImageUnload;
+                            break;
+                        case MonitorTypes.ProcessStart:
+                            _session.Source.Kernel.ProcessStart -= Kernel_ProcessStart;
+                            break;
+                        case MonitorTypes.ProcessStop:
+                            _session.Source.Kernel.ProcessStop -= Kernel_ProcessStop;
+                            break;
+                        case MonitorTypes.RegistryCreate:
+                            _session.Source.Kernel.RegistryCreate -= Kernel_RegistryCreate;
+                            break;
+                        case MonitorTypes.RegistryOpen:
+                            _session.Source.Kernel.RegistryOpen -= Kernel_RegistryOpen;
+                            break;
+                        case MonitorTypes.RegistryDelete:
+                            _session.Source.Kernel.RegistryDelete -= Kernel_RegistryDelete;
+                            break;
+                        case MonitorTypes.RegistryUpdate:
+                            _session.Source.Kernel.RegistrySetValue -= Kernel_RegistrySetValue;
+                            break;
+                        case MonitorTypes.TcpConnect:
+                            _session.Source.Kernel.TcpIpConnect -= Kernel_TcpIpConnect;
+                            break;
+                        case MonitorTypes.TcpDisconnect:
+                            _session.Source.Kernel.TcpIpDisconnect -= Kernel_TcpIpDisconnect;
+                            break;
+                        case MonitorTypes.TcpReceive:
+                            _session.Source.Kernel.TcpIpRecv -= Kernel_TcpIpRecv;
+                            break;
+                        case MonitorTypes.TcpSend:
+                            _session.Source.Kernel.TcpIpSend -= Kernel_TcpIpSend;
+                            break;
+                        case MonitorTypes.UdpSend:
+                            _session.Source.Kernel.UdpIpSend -= Kernel_UdpIpSend;
+                            break;
+                        case MonitorTypes.UdpReceive:
+                            _session.Source.Kernel.UdpIpRecv -= Kernel_UdpIpRecv;
+                            break;
+                        case MonitorTypes.EventLogs:
+#pragma warning disable CA1416 // Validate platform compatibility
+                            if (_eventLog != null)
+                            {
+                                _eventLog.EntryWritten -= EventLog_EntryWritten;
+                                _eventLog.Dispose();
+                            }
+#pragma warning restore CA1416 // Validate platform compatibility
+                            break;
+                    }
+                }
+            }
+            _session?.Stop(true);
+            _eventStorage?.Shutdown();     
         }
         
         public void Dispose()
         {
-            _ctSource.Cancel();
+            _ctSource?.Cancel();
 
-            _session.Stop(true);
+            _session?.Stop(true);
 
             _eventStorage?.Shutdown();
 
