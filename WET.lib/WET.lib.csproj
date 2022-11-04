@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Jarred Capellman</Authors>
@@ -20,17 +20,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="2.0.74" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="6.0.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
   </ItemGroup>
 
-    <ItemGroup>
-        <None Include="bin\Release\net6.0\win-x64\WET.lib.dll" Pack="true" PackagePath="build\net6.0\x64\WET.lib.dll" />
-        <None Include="bin\Release\net6.0\win-x86\WET.lib.dll" Pack="true" PackagePath="build\net6.0\x86\WET.lib.dll" />
-    </ItemGroup>
-	
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
