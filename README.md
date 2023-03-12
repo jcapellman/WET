@@ -21,7 +21,7 @@ The library currently hooks into the following events:
 * UDP Send
 
 ## Requirements
-* .NET 6
+* .NET 7
 * Windows 7 SP1+
 
 Host process due to the nature of the hooks requires an admministrator (checks as of 0.7.1 will throw an Unauthorized Exception).
