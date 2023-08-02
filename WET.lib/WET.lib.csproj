@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Jarred Capellman</Authors>
@@ -16,7 +16,7 @@
     <PackageProjectUrl>https://github.com/jcapellman/WET</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/jcapellman/WET</RepositoryUrl>
-    <Description>Windows Event Tracing wrapper .NET 6 library hooking File, Registry, TCP Connections, UDP Connections, Processes and DLL Loading</Description>
+    <Description>Windows Event Tracing wrapper .NET 6 and .NET 7 library hooking File, Registry, TCP Connections, UDP Connections, Processes and DLL Loading</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,8 +27,8 @@
   </ItemGroup>
 
     <ItemGroup>
-        <None Include="bin\Release\net6.0\win-x64\WET.lib.dll" Pack="true" PackagePath="build\net6.0\x64\WET.lib.dll" />
-        <None Include="bin\Release\net6.0\win-x86\WET.lib.dll" Pack="true" PackagePath="build\net6.0\x86\WET.lib.dll" />
+        <None Include="bin\Release\net7.0\win-x64\WET.lib.dll" Pack="true" PackagePath="build\net7.0\x64\WET.lib.dll" />
+        <None Include="bin\Release\net7.0\win-x86\WET.lib.dll" Pack="true" PackagePath="build\net7.0\x86\WET.lib.dll" />
     </ItemGroup>
 	
   <ItemGroup>
