@@ -27,23 +27,23 @@ namespace WET.lib
 
         private readonly CancellationTokenSource _ctSource = new();
 
-        private TraceEventSession _session;
+        private TraceEventSession? _session;
 
-        public event EventHandler<ETWEventContainerItem> OnEvent; 
+        public event EventHandler<ETWEventContainerItem>? OnEvent; 
 
-        private readonly List<BaseMonitor> _monitors;
+        private readonly Dictionary<MonitorTypes, BaseMonitor> _monitors;
 
-        private readonly List<BaseOutputFormatter> _outputFormatters;
+        private readonly Dictionary<OutputFormat, BaseOutputFormatter> _outputFormatters;
 
-        private BaseOutputFormatter _selectedOutputFormatter;
+        private BaseOutputFormatter? _selectedOutputFormatter;
 
-        private EventLog _eventLog;
+        private EventLog? _eventLog;
 
-        private IEventFilter _eventFilter;
+        private IEventFilter? _eventFilter;
 
-        private ILogger _logger;
+        private ILogger? _logger;
 
-        private IEventStorage _eventStorage;
+        private IEventStorage? _eventStorage;
 
         private DateTime _lastPush = DateTime.Now;
 
@@ -55,7 +55,9 @@ namespace WET.lib
 
         private int? _traceProcessId;
 
-        private ConcurrentBag<ETWEventContainerItem> _throttledItems = new();
+        private ConcurrentQueue<ETWEventContainerItem> _throttledItems = new();
+
+        private static readonly string _machineName = Environment.MachineName;
 
         private static bool IsRunningAsAdmin()
         {
@@ -70,11 +72,15 @@ namespace WET.lib
 
         public ETWMonitor()
         {
-            _monitors = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseMonitor))
-                .Select(a => (BaseMonitor) Activator.CreateInstance(a)).ToList();
+            _monitors = GetType().Assembly.GetTypes()
+                .Where(a => a.BaseType == typeof(BaseMonitor))
+                .Select(a => (BaseMonitor)Activator.CreateInstance(a)!)
+                .ToDictionary(m => m.MonitorType);
 
-            _outputFormatters = GetType().Assembly.GetTypes().Where(a => a.BaseType == typeof(BaseOutputFormatter))
-                .Select(a => (BaseOutputFormatter) Activator.CreateInstance(a)).ToList();
+            _outputFormatters = GetType().Assembly.GetTypes()
+                .Where(a => a.BaseType == typeof(BaseOutputFormatter))
+                .Select(a => (BaseOutputFormatter)Activator.CreateInstance(a)!)
+                .ToDictionary(f => f.Formatter);
 
             if (!IsRunningAsAdmin())
             {
@@ -97,7 +103,7 @@ namespace WET.lib
 
             _eventStorage = eventStorage;
 
-            _selectedOutputFormatter = _outputFormatters.FirstOrDefault(a => a.Formatter == outputFormat);
+            _selectedOutputFormatter = _outputFormatters.GetValueOrDefault(outputFormat);
 
             if (string.IsNullOrEmpty(sessionName))
             {
@@ -108,8 +114,9 @@ namespace WET.lib
 
             LogDebug($"Starting ETW Session ({sessionName})");
 
-            var enabledMonitors = monitorTypes == MonitorTypes.All ? 
-                _monitors : _monitors.Where(a => monitorTypes.HasFlag(a.MonitorType)).ToList();
+            var enabledMonitors = monitorTypes == MonitorTypes.All 
+                ? _monitors.Values 
+                : _monitors.Values.Where(a => monitorTypes.HasFlag(a.MonitorType));
 
             _session.EnableKernelProvider(enabledMonitors.Where(a => a.KernelEventTracing).Select(a => a.KeyWordMap).ToKeywords());
             
@@ -229,11 +236,9 @@ namespace WET.lib
 
         private void ParseKernelEvent(MonitorTypes monitorType, TraceEvent item)
         {
-            var monitor = _monitors.FirstOrDefault(a => a.MonitorType == monitorType);
-
-            if (monitor == null)
+            if (!_monitors.TryGetValue(monitorType, out var monitor))
             {
-                throw new Exception($"{monitorType} could not be mapped");
+                throw new InvalidOperationException($"{monitorType} could not be mapped");
             }
 
             var data = monitor.ParseKernel(item);
@@ -267,10 +272,10 @@ namespace WET.lib
                 id = Guid.NewGuid(),
                 hostid = _hostID ?? 0,
                 MonitorType = monitorType,
-                Format = _selectedOutputFormatter.Formatter,
+                Format = _selectedOutputFormatter!.Formatter,
                 Payload = _selectedOutputFormatter.ConvertData(data),
                 Timestamp = DateTimeOffset.Now,
-                hostname = Environment.MachineName
+                hostname = _machineName
             };
 
             // If either is set assume batching
@@ -279,7 +284,13 @@ namespace WET.lib
                 if ((_interval.HasValue && DateTime.Now.Subtract(_lastPush) > _interval.Value) ||
                     (_threshold.HasValue && _throttledItems.Count > _threshold.Value))
                 {
-                    var result = await _eventStorage.WriteBatchEventAsync(_throttledItems.ToList());
+                    var itemsToWrite = new List<ETWEventContainerItem>();
+                    while (_throttledItems.TryDequeue(out var item))
+                    {
+                        itemsToWrite.Add(item);
+                    }
+
+                    var result = await _eventStorage!.WriteBatchEventAsync(itemsToWrite);
 
                     if (!result)
                     {
@@ -288,13 +299,12 @@ namespace WET.lib
                         return;
                     }
 
-                    _throttledItems.Clear();
                     _lastPush = DateTime.Now;
 
                     return;
                 }
-                
-                _throttledItems.Add(containerItem);
+
+                _throttledItems.Enqueue(containerItem);
                 
                 return;
             }
@@ -316,13 +326,18 @@ namespace WET.lib
 
         private void ParseEvent(MonitorTypes monitorType, object item)
         {
-            var data = _monitors.FirstOrDefault(a => a.MonitorType == monitorType)?.Parse(item);
+            if (!_monitors.TryGetValue(monitorType, out var monitor))
+            {
+                throw new InvalidOperationException($"{monitorType} could not be mapped");
+            }
+
+            var data = monitor.Parse(item);
 
             if (data == null)
             {
-                throw new Exception($"{monitorType} could not be mapped");
+                throw new InvalidOperationException($"{monitorType} could not be mapped");
             }
-            
+
             Parse(monitorType, data);
         }
 
@@ -391,7 +406,7 @@ namespace WET.lib
                 _session.Source.StopProcessing();
 
                 // Unsubscribe from the events
-                foreach (var monitor in _monitors)
+                foreach (var monitor in _monitors.Values)
                 {
                     switch (monitor.MonitorType)
                     {

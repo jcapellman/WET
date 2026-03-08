@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 
 using WET.lib.Enums;
 
@@ -7,8 +8,8 @@ namespace WET.lib.Containers
     public class ETWEventContainerItem
     {
         public Guid id { get; internal set; }
-        
-        public string hostname { get; internal set; }
+
+        public string? hostname { get; internal set; }
 
         public DateTimeOffset Timestamp { get; internal set; }
 
@@ -16,10 +17,15 @@ namespace WET.lib.Containers
 
         public OutputFormat Format { get; internal set; }
 
-        public string Payload { get; internal set; }
+        public string? Payload { get; internal set; }
 
         public long hostid { get; internal set; }
 
-        public override string ToString() => System.Text.Json.JsonSerializer.Serialize(this);
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
+        public override string ToString() => JsonSerializer.Serialize(this, _jsonOptions);
     }
 }
