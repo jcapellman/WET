@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,17 +16,15 @@ namespace WET.UnitTests.MonitorTests
         private readonly TcpConnectMonitor _monitor = new();
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void TcpConnectMonitor_NullTest()
         {
-            _monitor.ParseKernel(null);
+            Assert.ThrowsException<ArgumentNullException>(() => _monitor.ParseKernel(null!));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void TcpConnectMonitor_InvalidArgument()
         {
-            _monitor.ParseKernel(new TestEventData());
+            Assert.ThrowsException<ArgumentException>(() => _monitor.ParseKernel(new TestEventData()));
         }
 
         [TestMethod]

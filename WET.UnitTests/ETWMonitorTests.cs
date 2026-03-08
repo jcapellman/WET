@@ -16,9 +16,9 @@ namespace WET.UnitTests
         public void ETWMonitor_Null()
         {
             var etw = new ETWMonitor();
-            
-            etw.Start(null, MonitorTypes.All, OutputFormat.CSV);
-            
+
+            etw.Start(null!, MonitorTypes.All, OutputFormat.CSV);
+
             etw.Stop();
         }
 
@@ -36,7 +36,7 @@ namespace WET.UnitTests
             etw.Stop();
         }
 
-        private void Etw_OnEvent(object sender, lib.Containers.ETWEventContainerItem e)
+        private void Etw_OnEvent(object? sender, lib.Containers.ETWEventContainerItem e)
         {
             Assert.IsNotNull(e);
 

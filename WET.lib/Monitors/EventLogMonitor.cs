@@ -25,7 +25,7 @@ namespace WET.lib.Monitors
             throw new NotImplementedException();
         }
 
-        protected override object ParseTraceEvent(object eventData)
+        protected override object? ParseTraceEvent(object eventData)
         {
             if (eventData is not EventLogEntry obj)
             {

@@ -20,7 +20,7 @@ namespace WET.lib.Monitors
 
         protected override object ParseKernelTraceEvent(TraceEvent eventData)
         {
-            var obj = eventData as RegistryTraceData;
+            var obj = (RegistryTraceData)eventData;
 
             return new RegistryCreateMonitorItem
             {

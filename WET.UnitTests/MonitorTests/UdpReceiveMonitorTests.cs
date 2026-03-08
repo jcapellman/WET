@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,17 +16,15 @@ namespace WET.UnitTests.MonitorTests
         private readonly UdpReceiveMonitor _monitor = new();
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void UdpReceiveMonitor_NullTest()
         {
-            _monitor.ParseKernel(null);
+            Assert.ThrowsException<ArgumentNullException>(() => _monitor.ParseKernel(null!));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void UdpReceiveMonitor_InvalidArgument()
         {
-            _monitor.ParseKernel(new TestEventData());
+            Assert.ThrowsException<ArgumentException>(() => _monitor.ParseKernel(new TestEventData()));
         }
 
         [TestMethod]

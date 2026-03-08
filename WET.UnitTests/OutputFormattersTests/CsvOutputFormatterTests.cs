@@ -20,10 +20,9 @@ namespace WET.UnitTests.OutputFormattersTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void CsvOutput_NullTest()
         {
-            _csvFormatter.ConvertData(null);
+            Assert.ThrowsException<ArgumentNullException>(() => _csvFormatter.ConvertData(null!));
         }
 
         [TestMethod]

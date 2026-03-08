@@ -6,6 +6,6 @@ namespace WET.lib.MonitorItems
     {
         public int DestinationPort { get; internal set; }
 
-        public string DestinationIP { get; internal set; }
+        public string? DestinationIP { get; internal set; }
     }
 }

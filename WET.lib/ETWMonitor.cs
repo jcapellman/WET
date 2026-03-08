@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -31,9 +32,9 @@ namespace WET.lib
 
         public event EventHandler<ETWEventContainerItem>? OnEvent; 
 
-        private readonly Dictionary<MonitorTypes, BaseMonitor> _monitors;
+        private readonly FrozenDictionary<MonitorTypes, BaseMonitor> _monitors;
 
-        private readonly Dictionary<OutputFormat, BaseOutputFormatter> _outputFormatters;
+        private readonly FrozenDictionary<OutputFormat, BaseOutputFormatter> _outputFormatters;
 
         private BaseOutputFormatter? _selectedOutputFormatter;
 
@@ -45,7 +46,7 @@ namespace WET.lib
 
         private IEventStorage? _eventStorage;
 
-        private DateTime _lastPush = DateTime.Now;
+        private DateTime _lastPush = DateTime.UtcNow;
 
         private TimeSpan? _interval;
 
@@ -55,7 +56,9 @@ namespace WET.lib
 
         private int? _traceProcessId;
 
-        private ConcurrentQueue<ETWEventContainerItem> _throttledItems = new();
+        private readonly ConcurrentQueue<ETWEventContainerItem> _throttledItems = new();
+
+        private readonly SemaphoreSlim _batchLock = new(1, 1);
 
         private static readonly string _machineName = Environment.MachineName;
 
@@ -75,12 +78,12 @@ namespace WET.lib
             _monitors = GetType().Assembly.GetTypes()
                 .Where(a => a.BaseType == typeof(BaseMonitor))
                 .Select(a => (BaseMonitor)Activator.CreateInstance(a)!)
-                .ToDictionary(m => m.MonitorType);
+                .ToFrozenDictionary(m => m.MonitorType);
 
             _outputFormatters = GetType().Assembly.GetTypes()
                 .Where(a => a.BaseType == typeof(BaseOutputFormatter))
                 .Select(a => (BaseOutputFormatter)Activator.CreateInstance(a)!)
-                .ToDictionary(f => f.Formatter);
+                .ToFrozenDictionary(f => f.Formatter);
 
             if (!IsRunningAsAdmin())
             {
@@ -89,7 +92,7 @@ namespace WET.lib
         }
 
         private void InitializeMonitor(string sessionName, MonitorTypes monitorTypes, OutputFormat outputFormat, 
-            IEventFilter eventFilter, IEventStorage eventStorage, TimeSpan? interval = null, int? threshold = null, long? hostId = null, ILogger logger = null)
+            IEventFilter? eventFilter, IEventStorage? eventStorage, TimeSpan? interval = null, int? threshold = null, long? hostId = null, ILogger? logger = null)
         {
             _logger = logger;
 
@@ -177,10 +180,7 @@ namespace WET.lib
                         break;
                     case MonitorTypes.EventLogs:
 #pragma warning disable CA1416 // Validate platform compatibility
-                        if (_eventLog is null)
-                        {
-                            _eventLog = new EventLog("Application", ".");
-                        }
+                        _eventLog ??= new EventLog("Application", ".");
 
                         _eventLog.EntryWritten += EventLog_EntryWritten;
                         _eventLog.EnableRaisingEvents = true;
@@ -193,8 +193,8 @@ namespace WET.lib
         }
 
         public void Start(string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All, 
-            OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null, IEventStorage eventStorage = null,
-            TimeSpan? interval = null, int? threshold = null, long? hostId = null, ILogger logger = null)
+            OutputFormat outputFormat = OutputFormat.JSON, IEventFilter? eventFilter = null, IEventStorage? eventStorage = null,
+            TimeSpan? interval = null, int? threshold = null, long? hostId = null, ILogger? logger = null)
         {
             Task.Run(() =>
             {
@@ -203,8 +203,8 @@ namespace WET.lib
         }
 
         public void StartProcessTrace(string processPath, string sessionName = DefaultSessionName, MonitorTypes monitorTypes = MonitorTypes.All,
-            OutputFormat outputFormat = OutputFormat.JSON, IEventFilter eventFilter = null, IEventStorage eventStorage = null,
-            TimeSpan? interval = null, int? threshold = null, long? hostId = null, ILogger logger = null)
+            OutputFormat outputFormat = OutputFormat.JSON, IEventFilter? eventFilter = null, IEventStorage? eventStorage = null,
+            TimeSpan? interval = null, int? threshold = null, long? hostId = null, ILogger? logger = null)
         {
             using Process process = new();
 
@@ -229,10 +229,7 @@ namespace WET.lib
             LogMessage(LogLevel.Error, message);
         }
 
-        private void LogMessage(LogLevel level, string message)
-        {
-            _logger?.Log(level, message);
-        }
+        private void LogMessage(LogLevel level, string message) => _logger?.Log(level, message);
 
         private void ParseKernelEvent(MonitorTypes monitorType, TraceEvent item)
         {
@@ -250,10 +247,10 @@ namespace WET.lib
                 return;
             }
 
-            Parse(monitorType, data);
+            _ = ParseAsync(monitorType, data);
         }
 
-        private async void Parse(MonitorTypes monitorType, object data)
+        private async Task ParseAsync(MonitorTypes monitorType, object data)
         {
             if (_eventFilter != null && _eventFilter.IsFilteredOut(monitorType, data))
             {
@@ -274,44 +271,50 @@ namespace WET.lib
                 MonitorType = monitorType,
                 Format = _selectedOutputFormatter!.Formatter,
                 Payload = _selectedOutputFormatter.ConvertData(data),
-                Timestamp = DateTimeOffset.Now,
+                Timestamp = DateTimeOffset.UtcNow,
                 hostname = _machineName
             };
 
             // If either is set assume batching
             if (_interval.HasValue || _threshold.HasValue)
             {
-                if ((_interval.HasValue && DateTime.Now.Subtract(_lastPush) > _interval.Value) ||
-                    (_threshold.HasValue && _throttledItems.Count > _threshold.Value))
-                {
-                    var itemsToWrite = new List<ETWEventContainerItem>();
-                    while (_throttledItems.TryDequeue(out var item))
-                    {
-                        itemsToWrite.Add(item);
-                    }
-
-                    var result = await _eventStorage!.WriteBatchEventAsync(itemsToWrite);
-
-                    if (!result)
-                    {
-                        LogError($"Could not write batch of throttled items");
-
-                        return;
-                    }
-
-                    _lastPush = DateTime.Now;
-
-                    return;
-                }
-
                 _throttledItems.Enqueue(containerItem);
-                
+
+                // Check if we should flush - use non-blocking lock attempt
+                var shouldFlush = (_interval.HasValue && DateTime.UtcNow.Subtract(_lastPush) > _interval.Value) ||
+                    (_threshold.HasValue && _throttledItems.Count > _threshold.Value);
+
+                if (shouldFlush && await _batchLock.WaitAsync(0).ConfigureAwait(false))
+                {
+                    try
+                    {
+                        var itemsToWrite = new List<ETWEventContainerItem>(_throttledItems.Count);
+                        while (_throttledItems.TryDequeue(out var item))
+                        {
+                            itemsToWrite.Add(item);
+                        }
+
+                        if (itemsToWrite.Count > 0)
+                        {
+                            var result = await _eventStorage!.WriteBatchEventAsync(itemsToWrite).ConfigureAwait(false);
+                            if (!result)
+                            {
+                                LogError("Could not write batch of throttled items");
+                            }
+                        }
+                        _lastPush = DateTime.UtcNow;
+                    }
+                    finally
+                    {
+                        _batchLock.Release();
+                    }
+                }
                 return;
             }
 
             if (_eventStorage != null)
             {
-                var result = await _eventStorage.WriteEventAsync(containerItem);
+                var result = await _eventStorage.WriteEventAsync(containerItem).ConfigureAwait(false);
 
                 if (!result)
                 {
@@ -331,14 +334,8 @@ namespace WET.lib
                 throw new InvalidOperationException($"{monitorType} could not be mapped");
             }
 
-            var data = monitor.Parse(item);
-
-            if (data == null)
-            {
-                throw new InvalidOperationException($"{monitorType} could not be mapped");
-            }
-
-            Parse(monitorType, data);
+            var data = monitor.Parse(item) ?? throw new InvalidOperationException($"{monitorType} could not be mapped");
+            _ = ParseAsync(monitorType, data);
         }
 
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -479,11 +476,11 @@ namespace WET.lib
         
         public void Dispose()
         {
-            _ctSource?.Cancel();
-
-            _session?.Stop(true);
-
-            _eventStorage?.Shutdown();
+            Stop();
+            
+            _ctSource.Dispose();
+            _batchLock.Dispose();
+            _session?.Dispose();
 
             GC.SuppressFinalize(this);
         }

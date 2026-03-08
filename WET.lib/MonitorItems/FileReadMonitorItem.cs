@@ -4,6 +4,6 @@ namespace WET.lib.MonitorItems
 {
     public class FileReadMonitorItem : BaseMonitorItem
     {
-        public string FileName { get; internal set; }
+        public string? FileName { get; internal set; }
     }
 }

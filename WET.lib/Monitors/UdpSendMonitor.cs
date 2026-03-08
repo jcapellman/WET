@@ -21,7 +21,7 @@ namespace WET.lib.Monitors
 
         protected override object ParseKernelTraceEvent(TraceEvent eventData)
         {
-            var obj = eventData as UdpIpTraceData;
+            var obj = (UdpIpTraceData)eventData;
 
             return new UdpSendMonitorItem
             {

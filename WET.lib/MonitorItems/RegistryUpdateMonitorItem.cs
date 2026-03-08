@@ -4,6 +4,6 @@ namespace WET.lib.MonitorItems
 {
     public class RegistryUpdateMonitorItem : BaseMonitorItem
     {
-        public string ValueName { get; internal set; }
+        public string? ValueName { get; internal set; }
     }
 }

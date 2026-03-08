@@ -16,17 +16,15 @@ namespace WET.UnitTests.MonitorTests
         private readonly FileReadMonitor _monitor = new();
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void FileReadMonitor_NullTest()
         {
-            _monitor.ParseKernel(null);
+            Assert.ThrowsException<ArgumentNullException>(() => _monitor.ParseKernel(null!));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void FileReadMonitor_InvalidArgument()
         {
-            _monitor.ParseKernel(new TestEventData());
+            Assert.ThrowsException<ArgumentException>(() => _monitor.ParseKernel(new TestEventData()));
         }
 
         [TestMethod]

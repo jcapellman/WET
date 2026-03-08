@@ -17,12 +17,9 @@ namespace WET.lib.Monitors.Base
 
         public bool KernelEventTracing = true;
 
-        public object ParseKernel(TraceEvent eventData)
+        public object? ParseKernel(TraceEvent eventData)
         {
-            if (eventData == null)
-            {
-                throw new ArgumentNullException(nameof(eventData));
-            }
+            ArgumentNullException.ThrowIfNull(eventData);
 
             if (eventData.GetType() != ExpectedEventDataType)
             {
@@ -32,12 +29,9 @@ namespace WET.lib.Monitors.Base
             return ParseKernelTraceEvent(eventData);
         }
 
-        public object Parse(object eventData)
+        public object? Parse(object eventData)
         {
-            if (eventData == null)
-            {
-                throw new ArgumentNullException(nameof(eventData));
-            }
+            ArgumentNullException.ThrowIfNull(eventData);
 
             if (eventData.GetType() != ExpectedEventDataType)
             {
@@ -47,8 +41,8 @@ namespace WET.lib.Monitors.Base
             return ParseTraceEvent(eventData);
         }
 
-        protected abstract object ParseKernelTraceEvent(TraceEvent eventData);
-        
-        protected abstract object ParseTraceEvent(object eventData);
+        protected abstract object? ParseKernelTraceEvent(TraceEvent eventData);
+
+        protected abstract object? ParseTraceEvent(object eventData);
     }
 }

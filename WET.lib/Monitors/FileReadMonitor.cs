@@ -21,9 +21,9 @@ namespace WET.lib.Monitors
 
         public override Type ExpectedEventDataType => typeof(DiskIOTraceData);
 
-        protected override object ParseKernelTraceEvent(TraceEvent eventData)
+        protected override object? ParseKernelTraceEvent(TraceEvent eventData)
         {
-            var obj = eventData as DiskIOTraceData;
+            var obj = (DiskIOTraceData)eventData;
 
             if (string.IsNullOrEmpty(obj.FileName))
             {

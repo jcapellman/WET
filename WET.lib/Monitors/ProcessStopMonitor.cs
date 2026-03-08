@@ -20,8 +20,8 @@ namespace WET.lib.Monitors
 
         protected override object ParseKernelTraceEvent(TraceEvent eventData)
         {
-            var obj = eventData as ProcessTraceData;
-            
+            var obj = (ProcessTraceData)eventData;
+
             return new ProcessStopMonitorItem
             {
                 FileName = obj.ImageFileName,

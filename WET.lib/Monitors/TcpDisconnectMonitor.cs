@@ -20,8 +20,8 @@ namespace WET.lib.Monitors
 
         protected override object ParseKernelTraceEvent(TraceEvent eventData)
         {
-            var obj = eventData as TcpIpTraceData;
-            
+            var obj = (TcpIpTraceData)eventData;
+
             return new TcpDisconnectMonitorItem
             {
                 DestinationIP = obj.daddr.ToString(),

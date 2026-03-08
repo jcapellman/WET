@@ -20,10 +20,9 @@ namespace WET.UnitTests.OutputFormattersTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void JsonOutput_NullTest()
         {
-            _jsonParser.ConvertData(null);
+            Assert.ThrowsException<ArgumentNullException>(() => _jsonParser.ConvertData(null!));
         }
 
         [TestMethod]
